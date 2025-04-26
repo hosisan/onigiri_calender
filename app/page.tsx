@@ -33,6 +33,23 @@ export default function Home() {
   // カレンダー部分のref
   const calendarRef = useRef<HTMLDivElement>(null);
   
+  // ダークモード状態
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // ダークモード状態の検出
+  useEffect(() => {
+    // クライアントサイドでのみ実行
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(darkModeMediaQuery.matches);
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches);
+    };
+    
+    darkModeMediaQuery.addEventListener('change', handleChange);
+    return () => darkModeMediaQuery.removeEventListener('change', handleChange);
+  }, []);
+  
   // 選択した月のおにぎりデータを取得
   const currentMonthOnigiri = getOnigiriByMonth(currentYear, currentMonth);
   
@@ -208,13 +225,27 @@ export default function Home() {
         )}
       </main>
       
-      {/* モーダルオーバーレイ - カレンダーの前面に表示 */}
+      {/* モーダルオーバーレイ - カレンダーの前面に表示（完全不透過） */}
       <div 
-        className={`${isDialogOpen ? "fixed" : "hidden"} inset-0 z-[100] bg-white dark:bg-gray-900 flex items-center justify-center p-4`}
-        style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+        className={`${isDialogOpen ? "fixed" : "hidden"} inset-0 z-[100] flex items-center justify-center p-4`}
+        style={{ 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          backgroundColor: isDarkMode ? '#111827' : 'white',
+          background: isDarkMode ? '#111827' : 'white'
+        }}
       >
         {selectedDate && (
-          <div className="w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden">
+          <div 
+            className="w-full max-w-3xl border rounded-lg shadow-md overflow-hidden" 
+            style={{
+              backgroundColor: isDarkMode ? '#1f2937' : 'white',
+              background: isDarkMode ? '#1f2937' : 'white',
+              borderColor: isDarkMode ? '#374151' : '#e5e7eb'
+            }}
+          >
             <OnigiriDialog
               isOpen={isDialogOpen}
               onClose={() => setIsDialogOpen(false)}
