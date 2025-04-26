@@ -156,9 +156,9 @@ export default function Home() {
   }, [onigiriData]);
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 dark:bg-gray-900">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-center mb-4">おにぎりカレンダー</h1>
+        <h1 className="text-3xl font-bold text-center mb-4 dark:text-white">おにぎりカレンダー</h1>
         
         <div className="flex justify-center mb-4">
           <div className="inline-flex rounded-md shadow-sm" role="group">
@@ -168,8 +168,8 @@ export default function Home() {
               className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
                 viewMode === "calendar" 
                   ? "bg-orange-500 text-white" 
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              } border border-gray-200`}
+                  : "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+              } border border-gray-200 dark:border-gray-700`}
             >
               カレンダー
             </button>
@@ -179,8 +179,8 @@ export default function Home() {
               className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
                 viewMode === "search" 
                   ? "bg-orange-500 text-white" 
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              } border border-gray-200`}
+                  : "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+              } border border-gray-200 dark:border-gray-700`}
             >
               検索
             </button>
@@ -210,11 +210,11 @@ export default function Home() {
       
       {/* モーダルオーバーレイ - カレンダーの前面に表示 */}
       <div 
-        className={`${isDialogOpen ? "fixed" : "hidden"} inset-0 z-[100] bg-white flex items-center justify-center p-4`}
-        style={{ top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'white' }}
+        className={`${isDialogOpen ? "fixed" : "hidden"} inset-0 z-[100] bg-white dark:bg-gray-900 flex items-center justify-center p-4`}
+        style={{ top: 0, left: 0, right: 0, bottom: 0 }}
       >
         {selectedDate && (
-          <div className="w-full max-w-3xl bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+          <div className="w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden">
             <OnigiriDialog
               isOpen={isDialogOpen}
               onClose={() => setIsDialogOpen(false)}
