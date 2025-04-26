@@ -143,7 +143,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               : `${formatDisplayDate(date)}のおにぎり`}
           </h2>
           {!isEditing && onigiri && (
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-black">
               {onigiri.name} - {onigiri.storeName}
             </p>
           )}
@@ -166,7 +166,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
           <form className="space-y-4 py-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-black mb-1">
                   おにぎり名 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -181,7 +181,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               </div>
               
               <div>
-                <label htmlFor="storeName" className="block text-sm font-medium text-gray-900 mb-1">
+                <label htmlFor="storeName" className="block text-sm font-medium text-black mb-1">
                   店舗名 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -196,7 +196,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               </div>
               
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-900 mb-1">
+                <label htmlFor="price" className="block text-sm font-medium text-black mb-1">
                   価格 (円) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -212,14 +212,14 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               </div>
               
               <div>
-                <label htmlFor="rating" className="block text-sm font-medium text-gray-900 mb-1">
+                <label htmlFor="rating" className="block text-sm font-medium text-black mb-1">
                   評価
                 </label>
                 <StarRating rating={formData.rating} onRatingChange={handleRatingChange} />
               </div>
               
               <div>
-                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-900 mb-1">
+                <label htmlFor="imageUrl" className="block text-sm font-medium text-black mb-1">
                   おにぎりの写真URL
                 </label>
                 <input
@@ -233,7 +233,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                 />
                 {formData.imageUrl && (
                   <div className="mt-2">
-                    <p className="text-xs text-gray-700 mb-1">プレビュー:</p>
+                    <p className="text-xs text-black mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
                       <div className="relative h-24 w-full">
                         <Image
@@ -256,7 +256,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               </div>
               
               <div>
-                <label htmlFor="eatImageUrl" className="block text-sm font-medium text-gray-900 mb-1">
+                <label htmlFor="eatImageUrl" className="block text-sm font-medium text-black mb-1">
                   食べた時の写真URL
                 </label>
                 <input
@@ -270,7 +270,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                 />
                 {formData.eatImageUrl && (
                   <div className="mt-2">
-                    <p className="text-xs text-gray-700 mb-1">プレビュー:</p>
+                    <p className="text-xs text-black mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
                       <div className="relative h-24 w-full">
                         <Image
@@ -294,7 +294,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
             </div>
             
             <div>
-              <label htmlFor="memo" className="block text-sm font-medium text-gray-900 mb-1">
+              <label htmlFor="memo" className="block text-sm font-medium text-black mb-1">
                 メモ
               </label>
               <textarea
@@ -312,22 +312,22 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
           <div className="space-y-6 py-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">おにぎり名</h3>
+                <h3 className="text-sm font-medium text-black">おにぎり名</h3>
                 <p className="mt-1 text-sm text-black">{onigiri.name}</p>
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-gray-900">店舗名</h3>
+                <h3 className="text-sm font-medium text-black">店舗名</h3>
                 <p className="mt-1 text-sm text-black">{onigiri.storeName}</p>
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-gray-900">価格</h3>
+                <h3 className="text-sm font-medium text-black">価格</h3>
                 <p className="mt-1 text-sm text-black">{onigiri.price}円</p>
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-gray-900">評価</h3>
+                <h3 className="text-sm font-medium text-black">評価</h3>
                 <div className="mt-1">
                   <StarRating rating={onigiri.rating} />
                 </div>
@@ -339,7 +339,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {onigiri.imageUrl && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-2">おにぎりの写真</h3>
+                    <h3 className="text-sm font-medium text-black mb-2">おにぎりの写真</h3>
                     <div className="rounded-md overflow-hidden">
                       <div className="relative w-full" style={{ maxWidth: '500px', height: '300px', maxHeight: '500px' }}>
                         <Image
@@ -362,7 +362,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                 
                 {onigiri.eatImageUrl && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-2">食べた時の写真</h3>
+                    <h3 className="text-sm font-medium text-black mb-2">食べた時の写真</h3>
                     <div className="rounded-md overflow-hidden">
                       <div className="relative w-full" style={{ maxWidth: '500px', height: '300px', maxHeight: '500px' }}>
                         <Image
@@ -388,7 +388,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
             {/* メモ */}
             {onigiri.memo && (
               <div>
-                <h3 className="text-sm font-medium text-gray-900">メモ</h3>
+                <h3 className="text-sm font-medium text-black">メモ</h3>
                 <p className="mt-1 text-sm text-black whitespace-pre-line">{onigiri.memo}</p>
               </div>
             )}
