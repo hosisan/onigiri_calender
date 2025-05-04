@@ -103,7 +103,9 @@ export default function Home() {
     // 新しいおにぎりデータを作成
     const newOnigiri: Onigiri = {
       ...onigiriInput,
+      // データベースで生成されるUUID形式で保存（既存のIDがあればそれを利用、なければ新規生成）
       id: selectedOnigiri?.id || uuidv4(),
+      date: dateString,
       createdAt: selectedOnigiri?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

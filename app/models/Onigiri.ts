@@ -3,7 +3,8 @@
  * データベース移行に備えて拡張性を持たせた設計
  */
 export interface Onigiri {
-  id: string;
+  id: string; // データベースで生成されるUUID（UI表示には使用しない）
+  date: string; // 登録した年月日（YYYY-MM-DD形式）
   name: string; // おにぎり名
   storeName: string; // 店舗名
   price: number; // 価格

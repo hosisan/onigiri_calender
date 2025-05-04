@@ -10,6 +10,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2023-01-15": [
     {
       id: "1",
+      date: "2023-01-15",
       name: "鮭おにぎり",
       storeName: "ファミリーマート",
       price: 150,
@@ -23,6 +24,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2023-02-05": [
     {
       id: "2",
+      date: "2023-02-05",
       name: "ツナマヨおにぎり",
       storeName: "セブンイレブン",
       price: 160,
@@ -37,6 +39,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2023-02-06": [
     {
       id: "3",
+      date: "2023-02-06",
       name: "昆布おにぎり",
       storeName: "セブンイレブン",
       price: 140,
@@ -49,6 +52,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2023-03-10": [
     {
       id: "4",
+      date: "2023-03-10",
       name: "明太子おにぎり",
       storeName: "ローソン",
       price: 180,
@@ -62,6 +66,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2023-04-22": [
     {
       id: "5",
+      date: "2023-04-22",
       name: "高菜おにぎり",
       storeName: "ファミリーマート",
       price: 150,
@@ -75,6 +80,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2023-05-08": [
     {
       id: "6",
+      date: "2023-05-08",
       name: "梅おにぎり",
       storeName: "セブンイレブン",
       price: 140,
@@ -89,6 +95,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-01": [
     {
       id: "2025-03-01-1",
+      date: "2025-03-01",
       name: "鮭おにぎり",
       storeName: "ファミリーマート",
       price: 150,
@@ -102,6 +109,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-02": [
     {
       id: "2025-03-02-1",
+      date: "2025-03-02",
       name: "ツナマヨおにぎり",
       storeName: "セブンイレブン",
       price: 160,
@@ -116,6 +124,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-03": [
     {
       id: "2025-03-03-1",
+      date: "2025-03-03",
       name: "昆布おにぎり",
       storeName: "セブンイレブン",
       price: 140,
@@ -129,6 +138,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-04": [
     {
       id: "2025-03-04-1",
+      date: "2025-03-04",
       name: "明太子おにぎり",
       storeName: "ローソン",
       price: 180,
@@ -142,6 +152,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-05": [
     {
       id: "2025-03-05-1",
+      date: "2025-03-05",
       name: "高菜おにぎり",
       storeName: "ファミリーマート",
       price: 150,
@@ -155,6 +166,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-06": [
     {
       id: "2025-03-06-1",
+      date: "2025-03-06",
       name: "梅おにぎり",
       storeName: "セブンイレブン",
       price: 140,
@@ -168,6 +180,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-07": [
     {
       id: "2025-03-07-1",
+      date: "2025-03-07",
       name: "鮭マヨおにぎり",
       storeName: "ローソン",
       price: 170,
@@ -181,6 +194,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-08": [
     {
       id: "2025-03-08-1",
+      date: "2025-03-08",
       name: "たらこおにぎり",
       storeName: "ファミリーマート",
       price: 160,
@@ -195,6 +209,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-09": [
     {
       id: "2025-03-09-1",
+      date: "2025-03-09",
       name: "おかかおにぎり",
       storeName: "セブンイレブン",
       price: 130,
@@ -208,6 +223,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-10": [
     {
       id: "2025-03-10-1",
+      date: "2025-03-10",
       name: "いくら醤油おにぎり",
       storeName: "高級おにぎり専門店",
       price: 350,
@@ -222,6 +238,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-11": [
     {
       id: "2025-03-11-1",
+      date: "2025-03-11",
       name: "塩むすび",
       storeName: "手作り",
       price: 50,
@@ -235,6 +252,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-12": [
     {
       id: "2025-03-12-1",
+      date: "2025-03-12",
       name: "五目おにぎり",
       storeName: "ローソン",
       price: 180,
@@ -248,6 +266,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-13": [
     {
       id: "2025-03-13-1",
+      date: "2025-03-13",
       name: "昆布おにぎり",
       storeName: "ファミリーマート",
       price: 140,
@@ -261,6 +280,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-14": [
     {
       id: "2025-03-14-1",
+      date: "2025-03-14",
       name: "鮭おにぎり",
       storeName: "セブンイレブン",
       price: 150,
@@ -274,6 +294,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-15": [
     {
       id: "2025-03-15-1",
+      date: "2025-03-15",
       name: "ツナマヨおにぎり",
       storeName: "ローソン",
       price: 160,
@@ -288,6 +309,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-16": [
     {
       id: "2025-03-16-1",
+      date: "2025-03-16",
       name: "明太子マヨおにぎり",
       storeName: "セブンイレブン",
       price: 180,
@@ -301,6 +323,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-17": [
     {
       id: "2025-03-17-1",
+      date: "2025-03-17",
       name: "高菜おにぎり",
       storeName: "ファミリーマート",
       price: 150,
@@ -314,6 +337,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-18": [
     {
       id: "2025-03-18-1",
+      date: "2025-03-18",
       name: "梅おにぎり",
       storeName: "ローソン",
       price: 140,
@@ -327,6 +351,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-19": [
     {
       id: "2025-03-19-1",
+      date: "2025-03-19",
       name: "昆布おにぎり",
       storeName: "セブンイレブン",
       price: 140,
@@ -340,6 +365,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-20": [
     {
       id: "2025-03-20-1",
+      date: "2025-03-20",
       name: "鮭おにぎり",
       storeName: "ファミリーマート",
       price: 150,
@@ -353,6 +379,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-21": [
     {
       id: "2025-03-21-1",
+      date: "2025-03-21",
       name: "ツナマヨおにぎり",
       storeName: "セブンイレブン",
       price: 160,
@@ -367,6 +394,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-22": [
     {
       id: "2025-03-22-1",
+      date: "2025-03-22",
       name: "明太子おにぎり",
       storeName: "ローソン",
       price: 180,
@@ -380,6 +408,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-23": [
     {
       id: "2025-03-23-1",
+      date: "2025-03-23",
       name: "高菜おにぎり",
       storeName: "ファミリーマート",
       price: 150,
@@ -393,6 +422,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-24": [
     {
       id: "2025-03-24-1",
+      date: "2025-03-24",
       name: "梅おにぎり",
       storeName: "セブンイレブン",
       price: 140,
@@ -406,6 +436,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-25": [
     {
       id: "2025-03-25-1",
+      date: "2025-03-25",
       name: "おかかおにぎり",
       storeName: "ローソン",
       price: 130,
@@ -419,6 +450,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-26": [
     {
       id: "2025-03-26-1",
+      date: "2025-03-26",
       name: "いくら醤油おにぎり",
       storeName: "高級おにぎり専門店",
       price: 350,
@@ -433,6 +465,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-27": [
     {
       id: "2025-03-27-1",
+      date: "2025-03-27",
       name: "塩むすび",
       storeName: "手作り",
       price: 50,
@@ -446,6 +479,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-28": [
     {
       id: "2025-03-28-1",
+      date: "2025-03-28",
       name: "五目おにぎり",
       storeName: "ローソン",
       price: 180,
@@ -459,6 +493,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-29": [
     {
       id: "2025-03-29-1",
+      date: "2025-03-29",
       name: "昆布おにぎり",
       storeName: "ファミリーマート",
       price: 140,
@@ -472,6 +507,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-30": [
     {
       id: "2025-03-30-1",
+      date: "2025-03-30",
       name: "鮭おにぎり",
       storeName: "セブンイレブン",
       price: 150,
@@ -485,6 +521,7 @@ export const sampleOnigiriData: Record<string, Onigiri[]> = {
   "2025-03-31": [
     {
       id: "2025-03-31-1",
+      date: "2025-03-31",
       name: "ツナマヨおにぎり",
       storeName: "ローソン",
       price: 160,

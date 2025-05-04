@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Onigiri, CreateOnigiriInput } from "../../models/Onigiri";
-import { formatDisplayDate } from "../../utils/date-utils";
+import { formatDisplayDate, formatDateToString } from "../../utils/date-utils";
 import { Button } from "../ui/button";
 import Image from "next/image";
 
@@ -67,7 +67,8 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       imageUrl: onigiri?.imageUrl || "",
       eatImageUrl: onigiri?.eatImageUrl || "",
       rating: onigiri?.rating || 3,
-      memo: onigiri?.memo || ""
+      memo: onigiri?.memo || "",
+      date: onigiri?.date || formatDateToString(date)
     });
     
     isFirstRender.current = false;
@@ -81,7 +82,8 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
     imageUrl: onigiri?.imageUrl || "",
     eatImageUrl: onigiri?.eatImageUrl || "",
     rating: onigiri?.rating || 3,
-    memo: onigiri?.memo || ""
+    memo: onigiri?.memo || "",
+    date: onigiri?.date || formatDateToString(date)
   });
 
   // フォーム入力の変更ハンドラ
@@ -126,7 +128,8 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
         imageUrl: onigiri?.imageUrl || "",
         eatImageUrl: onigiri?.eatImageUrl || "",
         rating: onigiri?.rating || 3,
-        memo: onigiri?.memo || ""
+        memo: onigiri?.memo || "",
+        date: onigiri?.date || formatDateToString(date)
       });
     }
     setIsEditing(!isEditing);
@@ -235,7 +238,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative h-24 w-full">
+                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: '200px' }}>
                         <Image
                           src={formData.imageUrl}
                           alt="プレビュー"
@@ -272,7 +275,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative h-24 w-full">
+                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: '200px' }}>
                         <Image
                           src={formData.eatImageUrl}
                           alt="プレビュー"
@@ -341,7 +344,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div>
                     <h3 className="text-sm font-medium text-black dark:text-white mb-2">おにぎりの写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '500px', height: '300px', maxHeight: '500px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: 'auto', aspectRatio: '1/1' }}>
                         <Image
                           src={onigiri.imageUrl}
                           alt={onigiri.name}
@@ -364,7 +367,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div>
                     <h3 className="text-sm font-medium text-black dark:text-white mb-2">食べた時の写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '500px', height: '300px', maxHeight: '500px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: 'auto', aspectRatio: '1/1' }}>
                         <Image
                           src={onigiri.eatImageUrl}
                           alt={`${onigiri.name}を食べたところ`}
