@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
 // 特定のIDのおにぎりを取得するAPI
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  context: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const id = params.id;
+    const id = context.params.id;
 
     if (!id) {
       return NextResponse.json({ error: 'IDが必要です' }, { status: 400 });
@@ -39,10 +39,10 @@ export async function GET(
 // 特定のIDのおにぎりを更新するAPI
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  context: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const id = params.id;
+    const id = context.params.id;
     const updates = await request.json();
 
     if (!id) {
@@ -74,10 +74,10 @@ export async function PATCH(
 // 特定のIDのおにぎりを削除するAPI
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  context: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const id = params.id;
+    const id = context.params.id;
 
     if (!id) {
       return NextResponse.json({ error: 'IDが必要です' }, { status: 400 });
