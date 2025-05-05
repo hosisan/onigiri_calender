@@ -5,6 +5,8 @@ import { Onigiri, CreateOnigiriInput } from "../../models/Onigiri";
 import { formatDisplayDate, formatDateToString } from "../../utils/date-utils";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { supabase } from "../../utils/supabase";
+// browser-image-resizerは直接インポートしない
 
 /**
  * 星評価コンポーネント
@@ -53,6 +55,10 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
   // 初回レンダリングフラグ
   const isFirstRender = useRef(true);
   
+  // 画像アップロード状態
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState("");
+  
   // Props変更時の処理
   useEffect(() => {
     // 日付が変わった場合、編集モードかどうかを再設定
@@ -86,6 +92,179 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
     date: onigiri?.date || formatDateToString(date)
   });
 
+  // 画像アップロード処理
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: "imageUrl" | "eatImageUrl") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // 画像ファイルかチェック
+    if (!file.type.match(/^image\/(jpeg|png|gif|jpg|webp)$/)) {
+      setImageUploadError("画像ファイル（JPEG、PNG、GIF、WebP）のみアップロードできます");
+      return;
+    }
+    
+    // ファイルサイズチェック（5MB以下）
+    if (file.size > 5 * 1024 * 1024) {
+      setImageUploadError("ファイルサイズは5MB以下にしてください");
+      return;
+    }
+    
+    setIsImageUploading(true);
+    setImageUploadError("");
+    
+    try {
+      // Supabase接続の確認
+      if (!supabase) {
+        throw new Error("Supabase接続が初期化されていません");
+      }
+      
+      // 画像サイズ取得とアスペクト比計算のためのpromise
+      const getImageAspectRatio = () => {
+        return new Promise<number>((resolve) => {
+          const img = new window.Image();
+          img.onload = () => {
+            const aspectRatio = img.height / img.width;
+            resolve(aspectRatio);
+          };
+          
+          // エラー時やタイムアウト時は1.0（正方形）のアスペクト比を使用
+          img.onerror = () => resolve(1.0);
+          
+          // 画像オブジェクトにURLを設定
+          img.src = URL.createObjectURL(file);
+        });
+      };
+      
+      // アスペクト比を取得
+      const aspectRatio = await getImageAspectRatio();
+      
+      // ファイル名を一意にするためにタイムスタンプとランダム文字列を追加
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `onigiri/${fileName}`;
+      
+      let resizedImage: Blob | File = file;
+      
+      try {
+        // browser-image-resizerを動的にインポート（クライアントサイドのみ）
+        if (typeof window !== 'undefined') {
+          const imageResizer = await import('browser-image-resizer');
+          if (imageResizer && imageResizer.readAndCompressImage) {
+            // 画像リサイズ設定（アスペクト比を維持）
+            const targetWidth = 500;
+            const targetHeight = Math.round(targetWidth * aspectRatio);
+            
+            const imageConfig = {
+              quality: 0.85,
+              maxWidth: targetWidth,
+              maxHeight: targetHeight,
+              autoRotate: true,
+              debug: false,
+            };
+            
+            // 画像をリサイズ
+            resizedImage = await imageResizer.readAndCompressImage(file, imageConfig);
+            console.log('画像をリサイズしました:', resizedImage.size, 'bytes');
+          }
+        }
+      } catch (resizeError) {
+        console.warn('画像リサイズに失敗しました。オリジナル画像を使用します:', resizeError);
+        // リサイズに失敗しても、オリジナル画像でアップロードを続行
+      }
+      
+      // バケット存在確認（エラーをキャッチしてもアップロードは試行）
+      let bucketName = 'onigiriimage'; // デフォルトのバケット名
+      try {
+        // 複数の可能性のあるバケット名をテスト
+        const bucketNames = ['onigiriimage'];
+        let validBucketName = null;
+        
+        for (const name of bucketNames) {
+          try {
+            // バケットの存在を確認（from().list()を使用）
+            const { data, error } = await supabase.storage.from(name).list('', { limit: 1 });
+            
+            if (!error) {
+              console.log(`バケット '${name}' が存在します:`, data);
+              validBucketName = name;
+              break;
+            } else {
+              console.warn(`バケット '${name}' は利用できません:`, error);
+              // バケットが見つからない場合はエラーを記録するだけ
+              if (error.message.includes('not found') || error.message.includes('doesn\'t exist')) {
+                console.error(`バケット '${name}' が見つかりません。管理者に連絡してバケットの作成を依頼してください。`);
+              }
+            }
+          } catch (e) {
+            console.warn(`バケット '${name}' チェック時にエラー:`, e);
+          }
+        }
+        
+        if (validBucketName) {
+          console.log('有効なバケット名を見つけました:', validBucketName);
+          bucketName = validBucketName; // 有効なバケット名を設定
+        } else {
+          console.error('有効なバケットが見つかりませんでした。');
+        }
+      } catch (bucketCheckError) {
+        console.warn('バケット確認エラー:', bucketCheckError);
+      }
+      
+      // Supabaseストレージにアップロード
+      console.log(`Supabaseの '${bucketName}' バケットにアップロード開始:`, filePath);
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, resizedImage, {
+          cacheControl: '3600',
+          upsert: true, // 同名ファイルが存在する場合は上書き
+          contentType: file.type // 元のファイルのMIMEタイプを保持
+        });
+      
+      if (error) {
+        console.error('Supabaseアップロードエラー:', error);
+        
+        // エラータイプに応じたメッセージ
+        if (error.message.includes('Permission')) {
+          setImageUploadError("アップロード権限がありません。管理者に連絡してください。");
+        } else if (error.message.includes('not found')) {
+          setImageUploadError("バケットが見つかりません。設定を確認してください。");
+        } else if (error.message.includes('row-level security policy') || error.message.includes('Unauthorized')) {
+          setImageUploadError("セキュリティポリシー違反: Supabaseダッシュボードで'onigiriimage'バケットのRLSポリシーを確認してください。匿名ユーザーに書き込み権限を付与する必要があります。");
+          console.error('RLSポリシーエラーの詳細:', error);
+          console.info('解決方法: Supabaseダッシュボードで、匿名ユーザー(anon)に対してINSERT権限を付与するRLSポリシーを設定してください。');
+        } else {
+          setImageUploadError(`アップロードエラー: ${error.message}`);
+        }
+        
+        throw error;
+      }
+      
+      console.log('アップロード成功:', data);
+      
+      // 公開URLを取得
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+      
+      console.log('公開URL:', publicUrl);
+      
+      // フォームデータを更新
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: publicUrl
+      }));
+      
+      setIsImageUploading(false);
+    } catch (error) {
+      console.error('画像アップロードエラー:', error);
+      if (!imageUploadError) {
+        // 既にエラーメッセージが設定されていない場合のみ設定
+        setImageUploadError("画像のアップロードに失敗しました");
+      }
+      setIsImageUploading(false);
+    }
+  };
+
   // フォーム入力の変更ハンドラ
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -105,9 +284,20 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
   
   // 保存ハンドラ
   const handleSave = () => {
+    // 必須フィールドのバリデーション
+    if (!formData.name || !formData.storeName) {
+      return;
+    }
+    
+    // 保存処理中にボタンを無効化するなどのUI処理があればここに追加
+    
+    // 親コンポーネントのonSaveを呼び出して保存
+    // onSave内部でダイアログが閉じるので、ここではsetIsEditingのみ行う
     onSave(date, formData);
     setIsEditing(false);
-    onClose();
+    
+    // 確認メッセージをコンソールに出力（デバッグ用）
+    console.log('おにぎりを保存します:', formData);
   };
   
   // ダイアログを閉じる処理
@@ -223,17 +413,41 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               
               <div>
                 <label htmlFor="imageUrl" className="block text-sm font-medium text-black dark:text-white mb-1">
-                  おにぎりの写真URL
+                  おにぎりの写真
                 </label>
-                <input
-                  type="text"
-                  id="imageUrl"
-                  name="imageUrl"
-                  value={formData.imageUrl || ""}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="/images/onigiri-sample-1.jpg"
-                />
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      id="imageUpload"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, "imageUrl")}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="imageUpload"
+                      className="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm text-black dark:text-white"
+                    >
+                      画像を選択
+                    </label>
+                    {isImageUploading && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-500"></div>
+                    )}
+                    {imageUploadError && (
+                      <p className="text-xs text-red-500">{imageUploadError}</p>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">または直接URLを入力</p>
+                  <input
+                    type="text"
+                    id="imageUrl"
+                    name="imageUrl"
+                    value={formData.imageUrl || ""}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="/images/onigiri-sample-1.jpg"
+                  />
+                </div>
                 {formData.imageUrl && (
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
@@ -260,25 +474,46 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               
               <div>
                 <label htmlFor="eatImageUrl" className="block text-sm font-medium text-black dark:text-white mb-1">
-                  食べた時の写真URL
+                  食べた時の写真
                 </label>
-                <input
-                  type="text"
-                  id="eatImageUrl"
-                  name="eatImageUrl"
-                  value={formData.eatImageUrl || ""}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  placeholder="/images/onigiri-eat-2.jpg"
-                />
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      id="eatImageUpload"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, "eatImageUrl")}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="eatImageUpload"
+                      className="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm text-black dark:text-white"
+                    >
+                      画像を選択
+                    </label>
+                    {isImageUploading && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-500"></div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">または直接URLを入力</p>
+                  <input
+                    type="text"
+                    id="eatImageUrl"
+                    name="eatImageUrl"
+                    value={formData.eatImageUrl || ""}
+                    onChange={handleChange}
+                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="/images/onigiri-eat-2.jpg"
+                  />
+                </div>
                 {formData.eatImageUrl && (
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: '200px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: 'auto', aspectRatio: '1/1' }}>
                         <Image
                           src={formData.eatImageUrl}
-                          alt="プレビュー"
+                          alt={`${formData.name}を食べたところ`}
                           fill
                           sizes="(max-width: 500px) 100vw, 500px"
                           className="object-contain rounded-md"
