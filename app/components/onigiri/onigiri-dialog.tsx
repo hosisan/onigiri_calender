@@ -590,8 +590,8 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
           </form>
         ) : onigiri ? (
           // 詳細表示
-          <div className="space-y-6 py-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <h3 className="text-sm font-medium text-black dark:text-white">おにぎり名</h3>
                 <p className="mt-1 text-sm text-black dark:text-gray-200">{onigiri.name}</p>
@@ -615,14 +615,14 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               </div>
             </div>
             
-            {/* 画像表示 */}
+            {/* 画像表示 - iPhone Safariでボタンが隠れないよう調整 */}
             {(onigiri.imageUrl || onigiri.eatImageUrl) && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {onigiri.imageUrl && (
                   <div>
                     <h3 className="text-sm font-medium text-black dark:text-white mb-1">おにぎりの写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '120px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '100px' }}>
                         <Image
                           src={onigiri.imageUrl}
                           alt={onigiri.name}
@@ -645,7 +645,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div>
                     <h3 className="text-sm font-medium text-black dark:text-white mb-1">食べた時の写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '120px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '100px' }}>
                         <Image
                           src={onigiri.eatImageUrl}
                           alt={`${onigiri.name}を食べたところ`}
@@ -670,7 +670,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
             {onigiri.memo && (
               <div>
                 <h3 className="text-sm font-medium text-black dark:text-white">メモ</h3>
-                <p className="mt-1 text-sm text-black dark:text-gray-200 whitespace-pre-line">{onigiri.memo}</p>
+                <p className="mt-1 text-sm text-black dark:text-gray-200 whitespace-pre-line line-clamp-3">{onigiri.memo}</p>
               </div>
             )}
           </div>
