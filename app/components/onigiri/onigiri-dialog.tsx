@@ -327,7 +327,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
 
   // モーダルスタイルのダイアログとして実装
   return (
-    <div className="w-full bg-white dark:bg-gray-800">
+    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-800 max-h-[100vh]">
       <div className="flex justify-between items-center p-4 border-b bg-white dark:bg-gray-800 dark:border-gray-700 sticky top-0 z-10">
         <div>
           <h2 className="text-xl font-bold text-black dark:text-white">
@@ -354,8 +354,8 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       </div>
 
       <div
-        className="p-4 overflow-y-auto bg-white dark:bg-gray-800"
-        style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8rem)' }}
+        className="p-4 overflow-y-auto flex-1 bg-white dark:bg-gray-800"
+        style={{ height: 'calc(100vh - 130px - env(safe-area-inset-bottom, 0px))' }}
       >
         {isEditing ? (
           // 編集フォーム
@@ -455,7 +455,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '300px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '200px' }}>
                         <Image
                           src={formData.imageUrl}
                           alt="プレビュー"
@@ -513,7 +513,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '300px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '200px' }}>
                         <Image
                           src={formData.eatImageUrl}
                           alt={`${formData.name}を食べたところ`}
@@ -582,7 +582,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div>
                     <h3 className="text-sm font-medium text-black dark:text-white mb-2">おにぎりの写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '300px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '200px' }}>
                         <Image
                           src={onigiri.imageUrl}
                           alt={onigiri.name}
@@ -605,7 +605,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div>
                     <h3 className="text-sm font-medium text-black dark:text-white mb-2">食べた時の写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '300px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '200px' }}>
                         <Image
                           src={onigiri.eatImageUrl}
                           alt={`${onigiri.name}を食べたところ`}
@@ -637,7 +637,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
         ) : null}
       </div>
       
-      <div className="p-4 border-t pb-[env(safe-area-inset-bottom)] flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10">
+      <div className="p-4 pt-2 pb-6 border-t flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10" style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}>
         {isEditing ? (
           <>
             <Button variant="outline" onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
