@@ -103,12 +103,6 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       return;
     }
     
-    // ファイルサイズチェック（5MB以下）
-    if (file.size > 5 * 1024 * 1024) {
-      setImageUploadError("ファイルサイズは5MB以下にしてください");
-      return;
-    }
-    
     setIsImageUploading(true);
     setImageUploadError("");
     
