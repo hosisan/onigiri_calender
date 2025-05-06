@@ -353,7 +353,10 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
         </button>
       </div>
 
-      <div className="p-4 max-h-[calc(100vh-10rem)] overflow-y-auto bg-white dark:bg-gray-800">
+      <div
+        className="p-4 overflow-y-auto bg-white dark:bg-gray-800"
+        style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8rem)' }}
+      >
         {isEditing ? (
           // 編集フォーム
           <form className="space-y-4 py-4">
@@ -634,7 +637,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
         ) : null}
       </div>
       
-      <div className="p-4 border-t flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10">
+      <div className="p-4 border-t pb-[env(safe-area-inset-bottom)] flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10">
         {isEditing ? (
           <>
             <Button variant="outline" onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
