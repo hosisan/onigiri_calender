@@ -328,7 +328,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
   // モーダルスタイルのダイアログとして実装
   return (
     <div className="w-full bg-white dark:bg-gray-800">
-      <div className="flex justify-between items-center p-4 border-b bg-white dark:bg-gray-800 dark:border-gray-700">
+      <div className="flex justify-between items-center p-4 border-b bg-white dark:bg-gray-800 dark:border-gray-700 sticky top-0 z-10">
         <div>
           <h2 className="text-xl font-bold text-black dark:text-white">
             {isEditing 
@@ -353,7 +353,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
         </button>
       </div>
 
-      <div className="p-4 max-h-[calc(100vh-8rem)] overflow-y-auto bg-white dark:bg-gray-800">
+      <div className="p-4 max-h-[calc(100vh-10rem)] overflow-y-auto bg-white dark:bg-gray-800">
         {isEditing ? (
           // 編集フォーム
           <form className="space-y-4 py-4">
@@ -452,7 +452,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: '200px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '300px' }}>
                         <Image
                           src={formData.imageUrl}
                           alt="プレビュー"
@@ -510,7 +510,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: 'auto', aspectRatio: '1/1' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '300px' }}>
                         <Image
                           src={formData.eatImageUrl}
                           alt={`${formData.name}を食べたところ`}
@@ -579,7 +579,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div>
                     <h3 className="text-sm font-medium text-black dark:text-white mb-2">おにぎりの写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: 'auto', aspectRatio: '1/1' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '300px' }}>
                         <Image
                           src={onigiri.imageUrl}
                           alt={onigiri.name}
@@ -602,7 +602,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div>
                     <h3 className="text-sm font-medium text-black dark:text-white mb-2">食べた時の写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '500px', maxHeight: '500px', height: 'auto', aspectRatio: '1/1' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '300px' }}>
                         <Image
                           src={onigiri.eatImageUrl}
                           alt={`${onigiri.name}を食べたところ`}
@@ -634,23 +634,23 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
         ) : null}
       </div>
       
-      <div className="p-4 border-t flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700">
+      <div className="p-4 border-t flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10">
         {isEditing ? (
           <>
-            <Button variant="outline" onClick={toggleEditMode}>
+            <Button variant="outline" onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
               キャンセル
             </Button>
-            <Button onClick={handleSave} disabled={!formData.name || !formData.storeName}>
+            <Button onClick={handleSave} disabled={!formData.name || !formData.storeName} className="px-3 py-1 sm:px-4 sm:py-2">
               保存
             </Button>
           </>
         ) : (
           <>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} className="px-3 py-1 sm:px-4 sm:py-2">
               閉じる
             </Button>
             {onigiri && (
-              <Button onClick={toggleEditMode}>
+              <Button onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
                 編集
               </Button>
             )}
