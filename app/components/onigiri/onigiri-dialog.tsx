@@ -69,7 +69,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
     setFormData({
       name: onigiri?.name || "",
       storeName: onigiri?.storeName || "",
-      price: onigiri?.price || 0,
+      price: onigiri?.price ?? (null as unknown as number),
       imageUrl: onigiri?.imageUrl || "",
       eatImageUrl: onigiri?.eatImageUrl || "",
       rating: onigiri?.rating || 3,
@@ -84,7 +84,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
   const [formData, setFormData] = useState<CreateOnigiriInput>({
     name: onigiri?.name || "",
     storeName: onigiri?.storeName || "",
-    price: onigiri?.price || 0,
+    price: onigiri?.price ?? (null as unknown as number),
     imageUrl: onigiri?.imageUrl || "",
     eatImageUrl: onigiri?.eatImageUrl || "",
     rating: onigiri?.rating || 3,
@@ -116,6 +116,47 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       // Supabase接続の確認
       if (!supabase) {
         throw new Error("Supabase接続が初期化されていません");
+      }
+      
+      // 既存の画像URLを取得
+      const existingImageUrl = formData[fieldName];
+      
+      // 既存画像があれば削除処理
+      if (existingImageUrl && existingImageUrl.includes('onigiri/')) {
+        try {
+          // 画像URLからストレージパスを抽出
+          // 例: https://xxx.supabase.co/storage/v1/object/public/onigiriimage/onigiri/12345-abc.jpg
+          // → onigiri/12345-abc.jpg
+          const pathMatch = existingImageUrl.match(/\/onigiri\/[^/]+\.[^/?#]+/);
+          if (pathMatch) {
+            const imagePath = pathMatch[0].substring(1); // 先頭の'/'を削除
+            console.log('削除する画像パス:', imagePath);
+            
+            // バケット名を確認（デフォルトは 'onigiriimage'）
+            let bucketName = 'onigiriimage';
+            if (existingImageUrl.includes('/public/')) {
+              // URLからバケット名を抽出
+              const bucketMatch = existingImageUrl.match(/\/public\/([^/]+)\//);
+              if (bucketMatch && bucketMatch[1]) {
+                bucketName = bucketMatch[1];
+              }
+            }
+            
+            // 既存画像をSupabaseストレージから削除
+            const { error: removeError } = await supabase.storage
+              .from(bucketName)
+              .remove([imagePath]);
+            
+            if (removeError) {
+              console.warn('既存画像の削除に失敗しました:', removeError);
+            } else {
+              console.log('既存画像を削除しました:', imagePath);
+            }
+          }
+        } catch (deleteError) {
+          console.warn('画像削除エラー:', deleteError);
+          // 削除に失敗しても、新しい画像のアップロードは続行
+        }
       }
       
       // 画像サイズ取得とアスペクト比計算のためのpromise
@@ -270,7 +311,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "price" ? parseInt(value, 10) || 0 : value
+      [name]: name === "price" ? (value === "" ? (null as unknown as number) : parseInt(value, 10)) : value
     }));
   };
   
@@ -314,7 +355,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       setFormData({
         name: onigiri?.name || "",
         storeName: onigiri?.storeName || "",
-        price: onigiri?.price || 0,
+        price: onigiri?.price ?? (null as unknown as number),
         imageUrl: onigiri?.imageUrl || "",
         eatImageUrl: onigiri?.eatImageUrl || "",
         rating: onigiri?.rating || 3,
@@ -399,9 +440,8 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   type="number"
                   id="price"
                   name="price"
-                  required
                   min="0"
-                  value={formData.price}
+                  value={formData.price === null ? "" : formData.price}
                   onChange={handleChange}
                   className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
