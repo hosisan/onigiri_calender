@@ -355,7 +355,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
 
       <div
         className="p-4 overflow-y-auto flex-1 bg-white dark:bg-gray-800"
-        style={{ height: 'calc(100vh - 130px - env(safe-area-inset-bottom, 0px))' }}
+        style={{ height: 'calc(100svh - 130px - env(safe-area-inset-bottom, 0px))' }}
       >
         {isEditing ? (
           // 編集フォーム
