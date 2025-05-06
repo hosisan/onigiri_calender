@@ -327,8 +327,8 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
 
   // モーダルスタイルのダイアログとして実装
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-800 max-h-[100vh]">
-      <div className="flex justify-between items-center p-4 border-b bg-white dark:bg-gray-800 dark:border-gray-700 sticky top-0 z-10">
+    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-800 max-h-[100svh]">
+      <div className="flex justify-between items-center p-3 border-b bg-white dark:bg-gray-800 dark:border-gray-700 sticky top-0 z-10">
         <div>
           <h2 className="text-xl font-bold text-black dark:text-white">
             {isEditing 
@@ -354,13 +354,13 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       </div>
 
       <div
-        className="p-4 overflow-y-auto flex-1 bg-white dark:bg-gray-800"
-        style={{ height: 'calc(100svh - 130px - env(safe-area-inset-bottom, 0px))' }}
+        className="p-3 overflow-y-auto flex-1 bg-white dark:bg-gray-800"
+        style={{ height: 'calc(100svh - 120px - env(safe-area-inset-bottom, 0px))' }}
       >
         {isEditing ? (
           // 編集フォーム
-          <form className="space-y-4 py-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form className="space-y-3 py-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-black dark:text-white mb-1">
                   おにぎり名 <span className="text-red-500">*</span>
@@ -455,7 +455,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '200px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '120px' }}>
                         <Image
                           src={formData.imageUrl}
                           alt="プレビュー"
@@ -513,7 +513,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   <div className="mt-2">
                     <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '200px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '120px' }}>
                         <Image
                           src={formData.eatImageUrl}
                           alt={`${formData.name}を食べたところ`}
@@ -541,7 +541,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               <textarea
                 id="memo"
                 name="memo"
-                rows={3}
+                rows={1}
                 value={formData.memo || ""}
                 onChange={handleChange}
                 className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -580,9 +580,9 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {onigiri.imageUrl && (
                   <div>
-                    <h3 className="text-sm font-medium text-black dark:text-white mb-2">おにぎりの写真</h3>
+                    <h3 className="text-sm font-medium text-black dark:text-white mb-1">おにぎりの写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '200px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '120px' }}>
                         <Image
                           src={onigiri.imageUrl}
                           alt={onigiri.name}
@@ -603,9 +603,9 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                 
                 {onigiri.eatImageUrl && (
                   <div>
-                    <h3 className="text-sm font-medium text-black dark:text-white mb-2">食べた時の写真</h3>
+                    <h3 className="text-sm font-medium text-black dark:text-white mb-1">食べた時の写真</h3>
                     <div className="rounded-md overflow-hidden">
-                      <div className="relative w-full" style={{ maxWidth: '100%', height: '200px' }}>
+                      <div className="relative w-full" style={{ maxWidth: '100%', height: '120px' }}>
                         <Image
                           src={onigiri.eatImageUrl}
                           alt={`${onigiri.name}を食べたところ`}
@@ -637,7 +637,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
         ) : null}
       </div>
       
-      <div className="p-4 pt-2 pb-6 border-t flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10" style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="p-3 pt-2 pb-5 border-t flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))' }}>
         {isEditing ? (
           <>
             <Button variant="outline" onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
