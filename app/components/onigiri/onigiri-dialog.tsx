@@ -680,9 +680,11 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       <div className="p-3 pt-2 pb-5 border-t flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))' }}>
         {isEditing ? (
           <>
-            <Button variant="outline" onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
-              キャンセル
-            </Button>
+            {onigiri && (
+              <Button variant="outline" onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
+                キャンセル
+              </Button>
+            )}
             <Button onClick={handleSave} disabled={!formData.name || !formData.storeName} className="px-3 py-1 sm:px-4 sm:py-2">
               保存
             </Button>
