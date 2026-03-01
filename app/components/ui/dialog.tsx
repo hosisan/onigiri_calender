@@ -46,13 +46,14 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // モバイル: フルスクリーンオーバーレイ
-        "fixed inset-0 z-50 flex flex-col bg-card duration-200",
+        // モバイル: フルスクリーンオーバーレイ（明示的サイジング）
+        "fixed top-0 left-0 z-50 flex flex-col bg-card",
+        "w-full h-[100dvh]",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         // デスクトップ: 中央モーダル
-        "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
-        "sm:w-full sm:max-w-lg sm:max-h-[85vh] sm:rounded-lg sm:border",
+        "sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2",
+        "sm:w-full sm:max-w-lg sm:h-auto sm:max-h-[85vh] sm:rounded-lg sm:border",
         "sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
         className
       )}
