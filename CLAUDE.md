@@ -45,6 +45,10 @@
 5. **Document Results**: Add review section to `tasks/todo.md`
 6. **Capture Lessons**: Update `tasks/lessons.md` after corrections
 
+## Documentation
+
+- **仕様書の同期**: UI変更、機能追加・削除、技術スタック変更など仕様に影響する変更を行った場合は、`SPECIFICATION.md` を必ず更新する
+
 ## Core Principles
 
 - **Simplicity First**: Make every change as simple as possible. Impact minimal code.

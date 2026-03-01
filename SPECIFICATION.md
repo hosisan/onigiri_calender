@@ -8,8 +8,8 @@
 
 | カテゴリ | 技術 | バージョン |
 |---------|------|-----------|
-| フレームワーク | Next.js (App Router) | 15.3.0 |
-| UIライブラリ | React | 19.0.0 |
+| フレームワーク | Next.js (App Router) | 15.5.12 |
+| UIライブラリ | React | 19.1.2 |
 | 言語 | TypeScript | 5 |
 | データベース | Supabase (PostgreSQL) | supabase-js 2.49.4 |
 | スタイリング | Tailwind CSS | 4 |
