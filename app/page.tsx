@@ -8,7 +8,7 @@ import { Onigiri, CreateOnigiriInput, OnigiriSearchParams } from "./models/Onigi
 import { formatDateToString } from "./utils/date-utils";
 import { v4 as uuidv4 } from "uuid";
 import { OnigiriService } from "./services/onigiri-service";
-import { BottomSheet, BottomSheetContent } from "./components/ui/bottom-sheet";
+import { Dialog, DialogContent } from "./components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "./lib/utils";
 
@@ -308,9 +308,9 @@ export default function Home() {
         )}
       </main>
 
-      {/* ボトムシート（モバイル）/ 中央モーダル（デスクトップ） */}
-      <BottomSheet open={isDialogOpen} onOpenChange={(open) => { if (!open) setIsDialogOpen(false); }}>
-        <BottomSheetContent>
+      {/* オーバーレイダイアログ */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) setIsDialogOpen(false); }}>
+        <DialogContent>
           {selectedDate && (
             <OnigiriDialog
               isOpen={isDialogOpen}
@@ -322,8 +322,8 @@ export default function Home() {
               }}
             />
           )}
-        </BottomSheetContent>
-      </BottomSheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

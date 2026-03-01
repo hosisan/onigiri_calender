@@ -2,7 +2,7 @@ import { screen, fireEvent } from '@testing-library/react';
 import { OnigiriDialog } from '../../../components/onigiri/onigiri-dialog';
 import { render } from '../../utils/test-utils';
 import { Onigiri } from '../../../models/Onigiri';
-import { BottomSheet } from '../../../components/ui/bottom-sheet';
+import { Dialog } from '../../../components/ui/dialog';
 
 // Supabaseのモック
 jest.mock('../../../utils/supabase', () => ({
@@ -22,9 +22,9 @@ jest.mock('../../../utils/supabase', () => ({
 const mockOnClose = jest.fn();
 const mockOnSave = jest.fn();
 
-// OnigiriDialogはBottomSheetTitle等を使うため、Radix DialogコンテキストでラップするHelper
-const renderWithBottomSheet = (ui: React.ReactElement) => {
-  return render(<BottomSheet open={true}>{ui}</BottomSheet>);
+// OnigiriDialogはDialogTitle等を使うため、Radix DialogコンテキストでラップするHelper
+const renderWithDialog = (ui: React.ReactElement) => {
+  return render(<Dialog open={true}>{ui}</Dialog>);
 };
 
 // テスト用の日付
@@ -51,7 +51,7 @@ describe('OnigiriDialog - 表示モード', () => {
   });
 
   it('おにぎり情報が正しく表示されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -67,7 +67,7 @@ describe('OnigiriDialog - 表示モード', () => {
   });
 
   it('編集ボタンクリックで編集モードに切り替わること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -86,7 +86,7 @@ describe('OnigiriDialog - 表示モード', () => {
   });
 
   it('閉じるボタンクリックでonCloseが呼ばれること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -102,7 +102,7 @@ describe('OnigiriDialog - 表示モード', () => {
   });
 
   it('情報カードが表示されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -119,7 +119,7 @@ describe('OnigiriDialog - 表示モード', () => {
   });
 
   it('メモが全文表示されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -140,7 +140,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('新規登録時は編集モードで開くこと', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -156,7 +156,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('フォームセクションが表示されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -171,7 +171,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('画像アップロードカードのプレースホルダーが表示されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -185,7 +185,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('必須フィールドが空の場合、保存ボタンが無効化されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -199,7 +199,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('価格フィールドに「円」サフィックスが表示されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -214,7 +214,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('画像URL入力がデフォルトで非表示であること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -230,7 +230,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('「URLを直接入力する」クリックでURL入力が表示されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -248,7 +248,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('保存ボタンクリックでonSaveが呼ばれること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -272,7 +272,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('キャンセルで編集内容が破棄されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -298,7 +298,7 @@ describe('OnigiriDialog - 編集モード', () => {
   });
 
   it('バリデーションエラーがblur後に表示されること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}
@@ -320,7 +320,7 @@ describe('OnigiriDialog - 編集モード', () => {
 
 describe('OnigiriDialog - アクセシビリティ', () => {
   it('BottomSheetTitleが正しいテキストでレンダリングされること', () => {
-    renderWithBottomSheet(
+    renderWithDialog(
       <OnigiriDialog
         isOpen={true}
         onClose={mockOnClose}

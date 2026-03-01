@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Onigiri, CreateOnigiriInput } from "../../models/Onigiri";
 import { formatDisplayDate, formatDateToString } from "../../utils/date-utils";
 import { Button } from "../ui/button";
-import { BottomSheetTitle, BottomSheetDescription } from "../ui/bottom-sheet";
+import { DialogTitle, DialogDescription } from "../ui/dialog";
 import Image from "next/image";
 import { supabase } from "../../utils/supabase";
 import { Plus } from "lucide-react";
@@ -364,14 +364,14 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       {/* ヘッダー */}
       <div className="flex justify-between items-center p-3 border-b bg-card border-border sticky top-0 z-10">
         <div>
-          <BottomSheetTitle className="text-xl font-bold text-foreground">
+          <DialogTitle className="text-xl font-bold text-foreground">
             {isEditing
               ? `${formatDisplayDate(date)}のおにぎりを${onigiri ? '編集' : '登録'}`
               : `${formatDisplayDate(date)}のおにぎり`}
-          </BottomSheetTitle>
-          <BottomSheetDescription className="sr-only">
+          </DialogTitle>
+          <DialogDescription className="sr-only">
             おにぎりの詳細情報を表示・編集します
-          </BottomSheetDescription>
+          </DialogDescription>
           {!isEditing && onigiri && (
             <p className="text-sm text-muted-foreground">
               {onigiri.name} - {onigiri.storeName}
