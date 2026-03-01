@@ -91,6 +91,8 @@ export default function Home() {
   // 日付選択時の処理
   const handleDateSelect = async (date: Date) => {
     setSelectedDate(date);
+    setSelectedOnigiri(undefined);
+    setIsDialogOpen(true);
 
     try {
       // 選択した日付のおにぎりデータを取得
@@ -100,13 +102,7 @@ export default function Home() {
       if (onigiriList.length > 0) {
         // おにぎりが登録されている場合は最初のおにぎりを選択
         setSelectedOnigiri(onigiriList[0]);
-      } else {
-        // おにぎりがない場合はundefinedをセット
-        setSelectedOnigiri(undefined);
       }
-
-      // ダイアログを開く
-      setIsDialogOpen(true);
     } catch (error) {
       console.error("日付選択時のデータ取得に失敗しました:", error);
     }
