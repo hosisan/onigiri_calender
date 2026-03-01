@@ -138,4 +138,82 @@ describe('CalendarGrid', () => {
     // おにぎり名が表示されていることを確認
     expect(screen.getByText('鮭おにぎり')).toBeInTheDocument();
   });
+});
+
+describe('CalendarGrid - モバイルレスポンシブ', () => {
+  it('日付セルにレスポンシブなクラスが適用されていること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    // 15日のボタンを取得
+    const day15Button = screen.getByText('15').closest('button');
+    expect(day15Button).toHaveClass('h-20');
+    expect(day15Button).toHaveClass('sm:h-32');
+  });
+
+  it('おにぎりのサムネイル画像にhidden sm:blockが適用されていること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    // 画像コンテナを取得（imageUrlがある場合）
+    const imageContainer = screen.getByAltText('鮭おにぎり').closest('div');
+    expect(imageContainer).toHaveClass('hidden');
+    expect(imageContainer).toHaveClass('sm:block');
+  });
+});
+
+describe('CalendarGrid - ダークモード対応', () => {
+  it('当月セルにbg-cardクラスが適用されていること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    // 15日は当月なのでbg-cardを含む
+    const day15Button = screen.getByText('15').closest('button');
+    expect(day15Button).toHaveClass('bg-card');
+  });
+
+  it('当月外セルにbg-mutedクラスが適用されていること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    // 2023年1月のカレンダーでは、前月の12月の日付が表示される
+    // カレンダーグリッドの最初のセルを確認（日曜始まりで1月1日が日曜の場合は当月）
+    // 1月1日は日曜日なので全て当月。代わりに2月の日付を確認
+    // getAllByTextで複数の同じテキストを取得する可能性があるため、特定の日付を使う
+    const allButtons = document.querySelectorAll('button[type="button"]');
+    // 最後のボタンは次月の日付のはず
+    const lastButtons = Array.from(allButtons).filter(btn => {
+      return btn.classList.contains('bg-muted') && btn.classList.contains('text-muted-foreground');
+    });
+    // 前月または次月の日付があればbg-mutedを持つ
+    expect(lastButtons.length).toBeGreaterThan(0);
+  });
 }); 

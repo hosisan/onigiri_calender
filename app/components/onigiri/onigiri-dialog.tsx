@@ -4,9 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Onigiri, CreateOnigiriInput } from "../../models/Onigiri";
 import { formatDisplayDate, formatDateToString } from "../../utils/date-utils";
 import { Button } from "../ui/button";
+import { DialogTitle, DialogDescription } from "../ui/dialog";
 import Image from "next/image";
 import { supabase } from "../../utils/supabase";
-// browser-image-resizerは直接インポートしない
 
 /**
  * 星評価コンポーネント
@@ -58,6 +58,10 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
   // 画像アップロード状態
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [imageUploadError, setImageUploadError] = useState("");
+
+  // 画像URL入力の表示状態
+  const [showImageUrlInput, setShowImageUrlInput] = useState(false);
+  const [showEatImageUrlInput, setShowEatImageUrlInput] = useState(false);
   
   // Props変更時の処理
   useEffect(() => {
@@ -362,23 +366,26 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
 
   // モーダルスタイルのダイアログとして実装
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-800 max-h-[100svh]">
-      <div className="flex justify-between items-center p-3 border-b bg-white dark:bg-gray-800 dark:border-gray-700 sticky top-0 z-10">
+    <div className="w-full h-full flex flex-col bg-card max-h-[100svh]">
+      <div className="flex justify-between items-center p-3 border-b bg-card border-border sticky top-0 z-10">
         <div>
-          <h2 className="text-xl font-bold text-black dark:text-white">
-            {isEditing 
+          <DialogTitle className="text-xl font-bold text-foreground">
+            {isEditing
               ? `${formatDisplayDate(date)}のおにぎりを${onigiri ? '編集' : '登録'}`
               : `${formatDisplayDate(date)}のおにぎり`}
-          </h2>
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            おにぎりの詳細情報を表示・編集します
+          </DialogDescription>
           {!isEditing && onigiri && (
-            <p className="text-sm text-black dark:text-gray-200">
+            <p className="text-sm text-muted-foreground">
               {onigiri.name} - {onigiri.storeName}
             </p>
           )}
         </div>
-        <button 
+        <button
           onClick={onClose}
-          className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
+          className="rounded-full p-2 hover:bg-muted text-foreground"
           aria-label="閉じる"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -389,7 +396,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       </div>
 
       <div
-        className="p-3 overflow-y-auto flex-1 bg-white dark:bg-gray-800"
+        className="p-3 overflow-y-auto flex-1 bg-card"
         style={{ height: 'calc(100svh - 120px - env(safe-area-inset-bottom, 0px))' }}
       >
         {isEditing ? (
@@ -397,7 +404,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
           <form className="space-y-3 py-2">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-black dark:text-white mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
                   おにぎり名 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -407,12 +414,12 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full p-2 border border-input rounded-md bg-background text-foreground"
                 />
               </div>
               
               <div>
-                <label htmlFor="storeName" className="block text-sm font-medium text-black dark:text-white mb-1">
+                <label htmlFor="storeName" className="block text-sm font-medium text-foreground mb-1">
                   店舗名 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -422,34 +429,39 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                   required
                   value={formData.storeName}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  className="w-full p-2 border border-input rounded-md bg-background text-foreground"
                 />
               </div>
               
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-black dark:text-white mb-1">
-                  価格 (円) <span className="text-red-500">*</span>
+                <label htmlFor="price" className="block text-sm font-medium text-foreground mb-1">
+                  価格 <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  min="0"
-                  value={formData.price === null ? "" : formData.price}
-                  onChange={handleChange}
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    min="0"
+                    value={formData.price === null ? "" : formData.price}
+                    onChange={handleChange}
+                    className="w-full p-2 pr-8 border border-input rounded-md bg-background text-foreground"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                    円
+                  </span>
+                </div>
               </div>
               
               <div>
-                <label htmlFor="rating" className="block text-sm font-medium text-black dark:text-white mb-1">
+                <label htmlFor="rating" className="block text-sm font-medium text-foreground mb-1">
                   評価
                 </label>
                 <StarRating rating={formData.rating} onRatingChange={handleRatingChange} />
               </div>
               
               <div>
-                <label htmlFor="imageUrl" className="block text-sm font-medium text-black dark:text-white mb-1">
+                <label htmlFor="imageUrl" className="block text-sm font-medium text-foreground mb-1">
                   おにぎりの写真
                 </label>
                 <div className="space-y-2">
@@ -463,7 +475,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                     />
                     <label
                       htmlFor="imageUpload"
-                      className="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm text-black dark:text-white"
+                      className="cursor-pointer px-4 py-2 bg-muted hover:bg-muted/80 rounded-md text-sm text-foreground"
                     >
                       画像を選択
                     </label>
@@ -474,20 +486,28 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                       <p className="text-xs text-red-500">{imageUploadError}</p>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">または直接URLを入力</p>
-                  <input
-                    type="text"
-                    id="imageUrl"
-                    name="imageUrl"
-                    value={formData.imageUrl || ""}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="/images/onigiri-sample-1.jpg"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowImageUrlInput(!showImageUrlInput)}
+                    className="text-xs text-muted-foreground underline hover:text-foreground"
+                  >
+                    {showImageUrlInput ? "URL入力を閉じる" : "URLを直接入力する"}
+                  </button>
+                  {showImageUrlInput && (
+                    <input
+                      type="text"
+                      id="imageUrl"
+                      name="imageUrl"
+                      value={formData.imageUrl || ""}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-input rounded-md bg-background text-foreground"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  )}
                 </div>
                 {formData.imageUrl && (
                   <div className="mt-2">
-                    <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
+                    <p className="text-xs text-foreground mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
                       <div className="relative w-full" style={{ maxWidth: '100%', height: '120px' }}>
                         <Image
@@ -510,7 +530,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               </div>
               
               <div>
-                <label htmlFor="eatImageUrl" className="block text-sm font-medium text-black dark:text-white mb-1">
+                <label htmlFor="eatImageUrl" className="block text-sm font-medium text-foreground mb-1">
                   食べた時の写真
                 </label>
                 <div className="space-y-2">
@@ -524,7 +544,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                     />
                     <label
                       htmlFor="eatImageUpload"
-                      className="cursor-pointer px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm text-black dark:text-white"
+                      className="cursor-pointer px-4 py-2 bg-muted hover:bg-muted/80 rounded-md text-sm text-foreground"
                     >
                       画像を選択
                     </label>
@@ -532,20 +552,28 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                       <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-500"></div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">または直接URLを入力</p>
-                  <input
-                    type="text"
-                    id="eatImageUrl"
-                    name="eatImageUrl"
-                    value={formData.eatImageUrl || ""}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="/images/onigiri-eat-2.jpg"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEatImageUrlInput(!showEatImageUrlInput)}
+                    className="text-xs text-muted-foreground underline hover:text-foreground"
+                  >
+                    {showEatImageUrlInput ? "URL入力を閉じる" : "URLを直接入力する"}
+                  </button>
+                  {showEatImageUrlInput && (
+                    <input
+                      type="text"
+                      id="eatImageUrl"
+                      name="eatImageUrl"
+                      value={formData.eatImageUrl || ""}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-input rounded-md bg-background text-foreground"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  )}
                 </div>
                 {formData.eatImageUrl && (
                   <div className="mt-2">
-                    <p className="text-xs text-black dark:text-gray-200 mb-1">プレビュー:</p>
+                    <p className="text-xs text-foreground mb-1">プレビュー:</p>
                     <div className="rounded-md overflow-hidden">
                       <div className="relative w-full" style={{ maxWidth: '100%', height: '120px' }}>
                         <Image
@@ -569,7 +597,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
             </div>
             
             <div>
-              <label htmlFor="memo" className="block text-sm font-medium text-black dark:text-white mb-1">
+              <label htmlFor="memo" className="block text-sm font-medium text-foreground mb-1">
                 メモ
               </label>
               <textarea
@@ -578,7 +606,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                 rows={1}
                 value={formData.memo || ""}
                 onChange={handleChange}
-                className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="w-full p-2 border border-input rounded-md bg-background text-foreground"
               />
             </div>
           </form>
@@ -587,22 +615,22 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <h3 className="text-sm font-medium text-black dark:text-white">おにぎり名</h3>
-                <p className="mt-1 text-sm text-black dark:text-gray-200">{onigiri.name}</p>
+                <h3 className="text-sm font-medium text-foreground">おにぎり名</h3>
+                <p className="mt-1 text-sm text-foreground">{onigiri.name}</p>
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-black dark:text-white">店舗名</h3>
-                <p className="mt-1 text-sm text-black dark:text-gray-200">{onigiri.storeName}</p>
+                <h3 className="text-sm font-medium text-foreground">店舗名</h3>
+                <p className="mt-1 text-sm text-foreground">{onigiri.storeName}</p>
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-black dark:text-white">価格</h3>
-                <p className="mt-1 text-sm text-black dark:text-gray-200">{onigiri.price}円</p>
+                <h3 className="text-sm font-medium text-foreground">価格</h3>
+                <p className="mt-1 text-sm text-foreground">{onigiri.price}円</p>
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-black dark:text-white">評価</h3>
+                <h3 className="text-sm font-medium text-foreground">評価</h3>
                 <div className="mt-1">
                   <StarRating rating={onigiri.rating} />
                 </div>
@@ -614,7 +642,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {onigiri.imageUrl && (
                   <div>
-                    <h3 className="text-sm font-medium text-black dark:text-white mb-1">おにぎりの写真</h3>
+                    <h3 className="text-sm font-medium text-foreground mb-1">おにぎりの写真</h3>
                     <div className="rounded-md overflow-hidden">
                       <div className="relative w-full" style={{ maxWidth: '100%', height: '100px' }}>
                         <Image
@@ -637,7 +665,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
                 
                 {onigiri.eatImageUrl && (
                   <div>
-                    <h3 className="text-sm font-medium text-black dark:text-white mb-1">食べた時の写真</h3>
+                    <h3 className="text-sm font-medium text-foreground mb-1">食べた時の写真</h3>
                     <div className="rounded-md overflow-hidden">
                       <div className="relative w-full" style={{ maxWidth: '100%', height: '100px' }}>
                         <Image
@@ -663,15 +691,15 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
             {/* メモ */}
             {onigiri.memo && (
               <div>
-                <h3 className="text-sm font-medium text-black dark:text-white">メモ</h3>
-                <p className="mt-1 text-sm text-black dark:text-gray-200 whitespace-pre-line line-clamp-3">{onigiri.memo}</p>
+                <h3 className="text-sm font-medium text-foreground">メモ</h3>
+                <p className="mt-1 text-sm text-foreground whitespace-pre-line line-clamp-3">{onigiri.memo}</p>
               </div>
             )}
           </div>
         ) : null}
       </div>
       
-      <div className="p-3 pt-2 pb-5 border-t flex justify-end space-x-2 bg-white dark:bg-gray-800 dark:border-gray-700 sticky bottom-0 z-10" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))' }}>
+      <div className="p-3 pt-2 pb-5 border-t border-border flex justify-end space-x-2 bg-card sticky bottom-0 z-10" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))' }}>
         {isEditing ? (
           <>
             {onigiri && (

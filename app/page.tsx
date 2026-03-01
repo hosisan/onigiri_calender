@@ -8,50 +8,34 @@ import { Onigiri, CreateOnigiriInput, OnigiriSearchParams } from "./models/Onigi
 import { formatDateToString } from "./utils/date-utils";
 import { v4 as uuidv4 } from "uuid";
 import { OnigiriService } from "./services/onigiri-service";
+import { Dialog, DialogContent } from "./components/ui/dialog";
 
 export default function Home() {
   // 現在選択中の年月
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
-  
+
   // 選択した日付と表示モード
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"calendar" | "search">("calendar");
-  
+
   // おにぎりデータ
   const [onigiriData, setOnigiriData] = useState<Record<string, Onigiri[]>>({});
   const [selectedOnigiri, setSelectedOnigiri] = useState<Onigiri | undefined>(undefined);
   const [searchResults, setSearchResults] = useState<Onigiri[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // カレンダー部分のref
   const calendarRef = useRef<HTMLDivElement>(null);
-  
-  // ダークモード状態
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  
-  // ダークモード状態の検出
-  useEffect(() => {
-    // クライアントサイドでのみ実行
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(darkModeMediaQuery.matches);
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDarkMode(e.matches);
-    };
-    
-    darkModeMediaQuery.addEventListener('change', handleChange);
-    return () => darkModeMediaQuery.removeEventListener('change', handleChange);
-  }, []);
-  
+
   // 初期データの読み込み
   useEffect(() => {
     const fetchInitialData = async () => {
       setIsLoading(true);
       try {
         const allOnigiri = await OnigiriService.getAll();
-        
+
         // 日付ごとに整理
         const grouped = allOnigiri.reduce<Record<string, Onigiri[]>>((acc, onigiri) => {
           if (!acc[onigiri.date]) {
@@ -60,7 +44,7 @@ export default function Home() {
           acc[onigiri.date].push(onigiri);
           return acc;
         }, {});
-        
+
         setOnigiriData(grouped);
         setIsLoading(false);
       } catch (error) {
@@ -68,17 +52,17 @@ export default function Home() {
         setIsLoading(false);
       }
     };
-    
+
     fetchInitialData();
   }, []);
-  
+
   // 現在の月のおにぎりデータを取得
   useEffect(() => {
     const fetchMonthlyData = async () => {
       setIsLoading(true);
       try {
         const monthlyOnigiri = await OnigiriService.getByMonth(currentYear, currentMonth);
-        
+
         // 日付ごとに整理
         const grouped = monthlyOnigiri.reduce<Record<string, Onigiri[]>>((acc, onigiri) => {
           if (!acc[onigiri.date]) {
@@ -87,32 +71,32 @@ export default function Home() {
           acc[onigiri.date].push(onigiri);
           return acc;
         }, {});
-        
+
         // 既存のデータを更新せず、月ごとのデータをマージ
         setOnigiriData(prev => ({
           ...prev,
           ...grouped
         }));
-        
+
         setIsLoading(false);
       } catch (error) {
         console.error(`${currentYear}年${currentMonth}月のデータ取得に失敗しました:`, error);
         setIsLoading(false);
       }
     };
-    
+
     fetchMonthlyData();
   }, [currentYear, currentMonth]);
-  
+
   // 日付選択時の処理
   const handleDateSelect = async (date: Date) => {
     setSelectedDate(date);
-    
+
     try {
       // 選択した日付のおにぎりデータを取得
       const dateString = formatDateToString(date);
       const onigiriList = await OnigiriService.getByDate(dateString);
-      
+
       if (onigiriList.length > 0) {
         // おにぎりが登録されている場合は最初のおにぎりを選択
         setSelectedOnigiri(onigiriList[0]);
@@ -120,28 +104,28 @@ export default function Home() {
         // おにぎりがない場合はundefinedをセット
         setSelectedOnigiri(undefined);
       }
-      
+
       // ダイアログを開く
       setIsDialogOpen(true);
     } catch (error) {
       console.error("日付選択時のデータ取得に失敗しました:", error);
     }
   };
-  
+
   // 月の移動処理
   const handleNavigateMonth = (year: number, month: number) => {
     setCurrentYear(year);
     setCurrentMonth(month);
   };
-  
+
   // おにぎり保存処理
   const handleSaveOnigiri = async (date: Date, onigiriInput: CreateOnigiriInput) => {
     const dateString = formatDateToString(date);
-    
+
     try {
       console.log('保存中のデータ:', onigiriInput);
       let savedOnigiri: Onigiri;
-      
+
       if (selectedOnigiri?.id) {
         // 既存のおにぎりを更新
         savedOnigiri = await OnigiriService.update(selectedOnigiri.id, {
@@ -157,22 +141,22 @@ export default function Home() {
         });
         console.log('新しいおにぎりを作成しました:', savedOnigiri);
       }
-      
+
       // ローカルの状態を更新
       setOnigiriData(prevData => {
         const newData = { ...prevData };
         newData[dateString] = [savedOnigiri];
         return newData;
       });
-      
+
       // 保存後に選択中のおにぎりを更新
       setSelectedOnigiri(savedOnigiri);
-      
+
       // 検索結果も更新
       if (viewMode === "search") {
         handleSearch({});
       }
-      
+
       // ダイアログを閉じる
       setIsDialogOpen(false);
     } catch (error) {
@@ -180,7 +164,7 @@ export default function Home() {
       alert("おにぎりの保存に失敗しました。もう一度お試しください。");
     }
   };
-  
+
   // 検索処理
   const handleSearch = async (params: OnigiriSearchParams) => {
     try {
@@ -190,24 +174,24 @@ export default function Home() {
       console.error("検索に失敗しました:", error);
     }
   };
-  
+
   // 検索結果からおにぎりを選択
   const handleSelectSearchResult = async (onigiri: Onigiri) => {
     setSelectedOnigiri(onigiri);
-    
+
     // 日付を設定
     const date = new Date(onigiri.date);
     setSelectedDate(date);
-    
+
     // カレンダーモードに切り替えて該当月に移動
     setViewMode("calendar");
     setCurrentYear(date.getFullYear());
     setCurrentMonth(date.getMonth() + 1);
-    
+
     // ダイアログを開く
     setIsDialogOpen(true);
   };
-  
+
   // データが変更されたときに検索結果を更新
   useEffect(() => {
     if (viewMode === "search") {
@@ -216,20 +200,20 @@ export default function Home() {
   }, [onigiriData, viewMode]);
 
   return (
-    <div className="container mx-auto py-8 px-4 dark:bg-gray-900">
+    <div className="container mx-auto py-8 px-4">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-center mb-4 dark:text-white">おにぎりカレンダー</h1>
-        
+        <h1 className="text-3xl font-bold text-center mb-4 text-foreground">おにぎりカレンダー</h1>
+
         <div className="flex justify-center mb-4">
           <div className="inline-flex rounded-md shadow-sm" role="group">
             <button
               type="button"
               onClick={() => setViewMode("calendar")}
               className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
-                viewMode === "calendar" 
-                  ? "bg-orange-500 text-white" 
-                  : "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-              } border border-gray-200 dark:border-gray-700`}
+                viewMode === "calendar"
+                  ? "bg-orange-500 text-white"
+                  : "bg-card text-foreground hover:bg-muted dark:hover:bg-muted"
+              } border border-border`}
             >
               カレンダー
             </button>
@@ -237,10 +221,10 @@ export default function Home() {
               type="button"
               onClick={() => setViewMode("search")}
               className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
-                viewMode === "search" 
-                  ? "bg-orange-500 text-white" 
-                  : "bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-              } border border-gray-200 dark:border-gray-700`}
+                viewMode === "search"
+                  ? "bg-orange-500 text-white"
+                  : "bg-card text-foreground hover:bg-muted dark:hover:bg-muted"
+              } border border-border`}
             >
               検索
             </button>
@@ -250,9 +234,34 @@ export default function Home() {
 
       <main>
         {isLoading ? (
-          <div className="text-center py-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">データを読み込み中...</p>
+          <div className="w-full max-w-4xl mx-auto">
+            {/* スケルトン: ヘッダー */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-md bg-muted animate-pulse" />
+              <div className="w-32 h-7 rounded-md bg-muted animate-pulse" />
+              <div className="w-10 h-10 rounded-md bg-muted animate-pulse" />
+            </div>
+
+            {/* スケルトン: 曜日ヘッダー */}
+            <div className="grid grid-cols-7 gap-1 mb-1">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="text-center p-1 sm:p-2">
+                  <div className="w-6 h-4 mx-auto rounded bg-muted animate-pulse" />
+                </div>
+              ))}
+            </div>
+
+            {/* スケルトン: カレンダーグリッド */}
+            <div className="grid grid-cols-7 gap-1">
+              {Array.from({ length: 35 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-20 sm:h-32 p-1 sm:p-2 border border-border rounded-lg bg-card animate-pulse"
+                >
+                  <div className="w-5 h-4 rounded bg-muted" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <>
@@ -265,7 +274,7 @@ export default function Home() {
                 onNavigateMonth={handleNavigateMonth}
               />
             </div>
-            
+
             {viewMode === "search" && (
               <OnigiriSearch
                 onSearch={handleSearch}
@@ -276,28 +285,11 @@ export default function Home() {
           </>
         )}
       </main>
-      
-      {/* モーダルオーバーレイ - カレンダーの前面に表示（完全不透過） */}
-      <div 
-        className={`${isDialogOpen ? "fixed" : "hidden"} inset-0 z-[100] flex items-center justify-center p-4`}
-        style={{ 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
-          backgroundColor: isDarkMode ? '#111827' : 'white',
-          background: isDarkMode ? '#111827' : 'white'
-        }}
-      >
-        {selectedDate && (
-          <div 
-            className="w-full max-w-3xl border rounded-lg shadow-md overflow-hidden" 
-            style={{
-              backgroundColor: isDarkMode ? '#1f2937' : 'white',
-              background: isDarkMode ? '#1f2937' : 'white',
-              borderColor: isDarkMode ? '#374151' : '#e5e7eb'
-            }}
-          >
+
+      {/* Radix Dialog によるモーダル */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) setIsDialogOpen(false); }}>
+        <DialogContent className="max-w-3xl p-0 gap-0 max-h-[100svh] overflow-hidden [&>button:last-child]:hidden">
+          {selectedDate && (
             <OnigiriDialog
               isOpen={isDialogOpen}
               onClose={() => setIsDialogOpen(false)}
@@ -307,9 +299,9 @@ export default function Home() {
                 handleSaveOnigiri(date, formData);
               }}
             />
-          </div>
-        )}
-      </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
