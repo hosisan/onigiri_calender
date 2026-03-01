@@ -41,14 +41,14 @@ const BottomSheetContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // モバイル: ボトムシート
+        // モバイル: フルスクリーンボトムシート
         "fixed inset-x-0 bottom-0 z-50 flex flex-col",
-        "max-h-[100svh] w-full",
-        "rounded-t-2xl border-t bg-card shadow-lg",
+        "h-[100svh] w-full",
+        "border-t bg-card shadow-lg",
         "data-[state=open]:[animation:slide-up_0.3s_ease-out] data-[state=closed]:[animation:slide-down_0.2s_ease-in]",
         // デスクトップ: 中央モーダル
         "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]",
-        "sm:max-w-lg sm:max-h-[85vh] sm:rounded-lg sm:border",
+        "sm:h-auto sm:max-w-lg sm:max-h-[85vh] sm:rounded-lg sm:border",
         "sm:data-[state=open]:[animation:none] sm:data-[state=closed]:[animation:none]",
         "sm:data-[state=open]:animate-in sm:data-[state=closed]:animate-out",
         "sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:fade-in-0",
