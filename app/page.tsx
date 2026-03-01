@@ -9,6 +9,8 @@ import { formatDateToString } from "./utils/date-utils";
 import { v4 as uuidv4 } from "uuid";
 import { OnigiriService } from "./services/onigiri-service";
 import { BottomSheet, BottomSheetContent } from "./components/ui/bottom-sheet";
+import { toast } from "sonner";
+import { cn } from "./lib/utils";
 
 export default function Home() {
   // 現在選択中の年月
@@ -25,6 +27,7 @@ export default function Home() {
   const [selectedOnigiri, setSelectedOnigiri] = useState<Onigiri | undefined>(undefined);
   const [searchResults, setSearchResults] = useState<Onigiri[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastSavedDate, setLastSavedDate] = useState<string | null>(null);
 
   // カレンダー部分のref
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -112,6 +115,7 @@ export default function Home() {
   const handleNavigateMonth = (year: number, month: number) => {
     setCurrentYear(year);
     setCurrentMonth(month);
+    setLastSavedDate(null);
   };
 
   // おにぎり保存処理
@@ -153,11 +157,17 @@ export default function Home() {
         handleSearch({});
       }
 
+      // セル保存アニメーション用
+      setLastSavedDate(dateString);
+
+      // 成功トースト表示
+      toast.success("おにぎりを記録しました 🍙");
+
       // ダイアログを閉じる
       setIsDialogOpen(false);
     } catch (error) {
       console.error("おにぎりの保存に失敗しました:", error);
-      alert("おにぎりの保存に失敗しました。もう一度お試しください。");
+      toast.error("おにぎりの保存に失敗しました。もう一度お試しください。");
     }
   };
 
@@ -198,29 +208,43 @@ export default function Home() {
   return (
     <div className="container mx-auto py-8 px-4">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-center mb-4 text-foreground">おにぎりカレンダー</h1>
+        <h1 className="text-3xl font-bold text-center mb-4 text-foreground">🍙 おにぎりカレンダー</h1>
 
         <div className="flex justify-center mb-4">
-          <div className="inline-flex rounded-md shadow-sm" role="group">
+          <div className="relative inline-flex rounded-lg bg-muted p-1" role="tablist">
+            {/* スライドインジケーター */}
+            <div
+              className={cn(
+                "absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md bg-orange-500 shadow-sm transition-transform duration-300 ease-in-out",
+                viewMode === "calendar" ? "translate-x-0 left-1" : "translate-x-full left-1"
+              )}
+              aria-hidden="true"
+            />
             <button
               type="button"
+              role="tab"
+              aria-selected={viewMode === "calendar"}
               onClick={() => setViewMode("calendar")}
-              className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+              className={cn(
+                "relative z-10 px-6 py-2 text-sm font-medium rounded-md transition-colors duration-300",
                 viewMode === "calendar"
-                  ? "bg-orange-500 text-white"
-                  : "bg-card text-foreground hover:bg-muted dark:hover:bg-muted"
-              } border border-border`}
+                  ? "text-white"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               カレンダー
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={viewMode === "search"}
               onClick={() => setViewMode("search")}
-              className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+              className={cn(
+                "relative z-10 px-6 py-2 text-sm font-medium rounded-md transition-colors duration-300",
                 viewMode === "search"
-                  ? "bg-orange-500 text-white"
-                  : "bg-card text-foreground hover:bg-muted dark:hover:bg-muted"
-              } border border-border`}
+                  ? "text-white"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               検索
             </button>
@@ -268,6 +292,8 @@ export default function Home() {
                 onigiriData={onigiriData}
                 onDateSelect={handleDateSelect}
                 onNavigateMonth={handleNavigateMonth}
+                lastSavedDate={lastSavedDate}
+                onSaveAnimationEnd={() => setLastSavedDate(null)}
               />
             </div>
 

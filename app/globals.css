@@ -79,3 +79,14 @@ body {
   from { transform: translateY(0); }
   to { transform: translateY(100%); }
 }
+
+/* カレンダーセル保存アニメーション */
+@keyframes cell-saved {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+
+.animate-cell-saved {
+  animation: cell-saved 0.6s ease-in-out;
+}

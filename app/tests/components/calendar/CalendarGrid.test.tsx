@@ -305,6 +305,92 @@ describe('CalendarGrid - 今日ボタン', () => {
   });
 });
 
+describe('CalendarGrid - 空状態ガイダンス', () => {
+  it('おにぎり未登録月にガイダンスメッセージが表示されること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    expect(screen.getByText('日付をタップしておにぎりを記録しましょう')).toBeInTheDocument();
+  });
+
+  it('おにぎり登録済み月にはガイダンスが表示されないこと', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    expect(screen.queryByText('日付をタップしておにぎりを記録しましょう')).not.toBeInTheDocument();
+  });
+});
+
+describe('CalendarGrid - 保存アニメーション', () => {
+  it('lastSavedDateに一致するセルにアニメーションクラスが適用されること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+        lastSavedDate="2023-01-15"
+      />
+    );
+
+    const day15Button = screen.getByText('15').closest('button');
+    expect(day15Button).toHaveClass('animate-cell-saved');
+  });
+
+  it('lastSavedDateがnullの場合アニメーションクラスが適用されないこと', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+        lastSavedDate={null}
+      />
+    );
+
+    const day15Button = screen.getByText('15').closest('button');
+    expect(day15Button).not.toHaveClass('animate-cell-saved');
+  });
+
+  it('アニメーション完了時にonSaveAnimationEndが呼ばれること', () => {
+    const mockAnimationEnd = jest.fn();
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+        lastSavedDate="2023-01-15"
+        onSaveAnimationEnd={mockAnimationEnd}
+      />
+    );
+
+    const day15Button = screen.getByText('15').closest('button');
+    if (day15Button) {
+      fireEvent.animationEnd(day15Button);
+    }
+
+    expect(mockAnimationEnd).toHaveBeenCalled();
+  });
+});
+
 describe('CalendarGrid - スワイプナビゲーション', () => {
   beforeEach(() => {
     mockNavigateMonth.mockClear();

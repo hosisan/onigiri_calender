@@ -138,7 +138,8 @@ describe('OnigiriSearch', () => {
       />
     );
 
-    expect(screen.getByText('検索条件に一致するおにぎりが見つかりませんでした。')).toBeInTheDocument();
+    expect(screen.getByText('おにぎりが見つかりませんでした')).toBeInTheDocument();
+    expect(screen.getByText('検索条件を変更して再度お試しください')).toBeInTheDocument();
   });
 
   it('ラベルにtext-foregroundクラスが適用されていること', () => {

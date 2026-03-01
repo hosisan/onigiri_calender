@@ -24,6 +24,8 @@ interface CalendarGridProps {
   onigiriData: Record<string, Onigiri[]>;
   onDateSelect: (date: Date) => void;
   onNavigateMonth: (year: number, month: number) => void;
+  lastSavedDate?: string | null;
+  onSaveAnimationEnd?: () => void;
 }
 
 /**
@@ -35,7 +37,9 @@ export function CalendarGrid({
   month,
   onigiriData,
   onDateSelect,
-  onNavigateMonth
+  onNavigateMonth,
+  lastSavedDate,
+  onSaveAnimationEnd
 }: CalendarGridProps) {
   // カレンダーに表示する日付の配列
   const calendarDays = getCalendarDays(year, month);
@@ -183,9 +187,15 @@ export function CalendarGrid({
                 isCurrentMonthDay
                   ? "bg-card hover:bg-muted"
                   : "bg-muted/50 text-muted-foreground",
-                isHoliday ? "text-red-500" : date.getDay() === 6 ? "text-blue-500" : ""
+                isHoliday ? "text-red-500" : date.getDay() === 6 ? "text-blue-500" : "",
+                dateString === lastSavedDate && "animate-cell-saved"
               )}
               onClick={() => handleDateClick(date)}
+              onAnimationEnd={() => {
+                if (dateString === lastSavedDate && onSaveAnimationEnd) {
+                  onSaveAnimationEnd();
+                }
+              }}
               type="button"
             >
               {/* おにぎり画像がある場合: 画像をセル背景として表示 */}
@@ -243,6 +253,20 @@ export function CalendarGrid({
           );
         })}
       </div>
+
+      {/* 空状態: 当月におにぎり未登録の場合 */}
+      {!calendarDays.some((date) => {
+        if (!isCurrentMonth(date, currentMonthDate)) return false;
+        const dateStr = formatDateToString(date);
+        return !!onigiriData[dateStr]?.length;
+      }) && (
+        <div className="text-center py-8 mt-4">
+          <p className="text-4xl mb-3">🍙</p>
+          <p className="text-muted-foreground text-sm">
+            日付をタップしておにぎりを記録しましょう
+          </p>
+        </div>
+      )}
     </div>
   );
 }
