@@ -43,7 +43,7 @@ const BottomSheetContent = React.forwardRef<
       className={cn(
         // モバイル: ボトムシート
         "fixed inset-x-0 bottom-0 z-50 flex flex-col",
-        "max-h-[90svh] w-full",
+        "max-h-[100svh] w-full",
         "rounded-t-2xl border-t bg-card shadow-lg",
         "data-[state=open]:[animation:slide-up_0.3s_ease-out] data-[state=closed]:[animation:slide-down_0.2s_ease-in]",
         // デスクトップ: 中央モーダル

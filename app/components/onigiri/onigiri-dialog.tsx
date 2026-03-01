@@ -360,7 +360,7 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
   };
 
   return (
-    <div className="w-full flex flex-col bg-card max-h-[90svh] sm:max-h-[85vh]">
+    <div className="w-full flex flex-col bg-card flex-1 min-h-0">
       {/* ヘッダー */}
       <div className="flex justify-between items-center p-3 border-b bg-card border-border sticky top-0 z-10">
         <div>
