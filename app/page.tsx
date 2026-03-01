@@ -233,9 +233,9 @@ export default function Home() {
           <div className="w-full max-w-4xl mx-auto">
             {/* スケルトン: ヘッダー */}
             <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-md bg-muted animate-pulse" />
+              <div className="w-12 h-12 rounded-md bg-muted animate-pulse" />
               <div className="w-32 h-7 rounded-md bg-muted animate-pulse" />
-              <div className="w-10 h-10 rounded-md bg-muted animate-pulse" />
+              <div className="w-12 h-12 rounded-md bg-muted animate-pulse" />
             </div>
 
             {/* スケルトン: 曜日ヘッダー */}
@@ -252,7 +252,7 @@ export default function Home() {
               {Array.from({ length: 35 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-20 sm:h-32 p-1 sm:p-2 border border-border rounded-lg bg-card animate-pulse"
+                  className="h-24 sm:h-36 p-1 sm:p-2 border border-border rounded-lg bg-card animate-pulse"
                 >
                   <div className="w-5 h-4 rounded bg-muted" />
                 </div>
