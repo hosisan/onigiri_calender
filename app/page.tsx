@@ -8,7 +8,7 @@ import { Onigiri, CreateOnigiriInput, OnigiriSearchParams } from "./models/Onigi
 import { formatDateToString } from "./utils/date-utils";
 import { v4 as uuidv4 } from "uuid";
 import { OnigiriService } from "./services/onigiri-service";
-import { Dialog, DialogContent } from "./components/ui/dialog";
+import { BottomSheet, BottomSheetContent } from "./components/ui/bottom-sheet";
 
 export default function Home() {
   // 現在選択中の年月
@@ -282,9 +282,9 @@ export default function Home() {
         )}
       </main>
 
-      {/* Radix Dialog によるモーダル */}
-      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) setIsDialogOpen(false); }}>
-        <DialogContent className="max-w-3xl p-0 gap-0 max-h-[100svh] overflow-hidden [&>button:last-child]:hidden">
+      {/* ボトムシート（モバイル）/ 中央モーダル（デスクトップ） */}
+      <BottomSheet open={isDialogOpen} onOpenChange={(open) => { if (!open) setIsDialogOpen(false); }}>
+        <BottomSheetContent>
           {selectedDate && (
             <OnigiriDialog
               isOpen={isDialogOpen}
@@ -296,8 +296,8 @@ export default function Home() {
               }}
             />
           )}
-        </DialogContent>
-      </Dialog>
+        </BottomSheetContent>
+      </BottomSheet>
     </div>
   );
 }

@@ -68,3 +68,14 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* ボトムシート: スライドアップ/ダウン アニメーション */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
