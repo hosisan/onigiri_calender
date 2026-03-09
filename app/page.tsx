@@ -171,6 +171,34 @@ export default function Home() {
     }
   };
 
+  // おにぎり削除処理
+  const handleDeleteOnigiri = async (onigiri: Onigiri) => {
+    try {
+      await OnigiriService.deleteWithImages(onigiri);
+
+      // ローカルの状態を更新
+      const dateString = onigiri.date;
+      setOnigiriData(prevData => {
+        const newData = { ...prevData };
+        const dateOnigiri = newData[dateString]?.filter(o => o.id !== onigiri.id) || [];
+        if (dateOnigiri.length === 0) {
+          delete newData[dateString];
+        } else {
+          newData[dateString] = dateOnigiri;
+        }
+        return newData;
+      });
+
+      setSelectedOnigiri(undefined);
+      toast.success("おにぎりを削除しました");
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("おにぎりの削除に失敗しました:", error);
+      toast.error("おにぎりの削除に失敗しました。もう一度お試しください。");
+      throw error;
+    }
+  };
+
   // 検索処理
   const handleSearch = async (params: OnigiriSearchParams) => {
     try {
@@ -320,6 +348,7 @@ export default function Home() {
               onSave={(date, formData) => {
                 handleSaveOnigiri(date, formData);
               }}
+              onDelete={handleDeleteOnigiri}
             />
           )}
         </DialogContent>

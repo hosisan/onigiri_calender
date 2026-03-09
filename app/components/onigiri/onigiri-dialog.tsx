@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { DialogTitle, DialogDescription } from "../ui/dialog";
 import Image from "next/image";
 import { supabase } from "../../utils/supabase";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 /**
  * 星評価コンポーネント
@@ -59,13 +59,14 @@ interface OnigiriDialogProps {
   date: Date;
   onigiri?: Onigiri;
   onSave: (date: Date, onigiri: CreateOnigiriInput) => void;
+  onDelete?: (onigiri: Onigiri) => void;
 }
 
 /**
  * おにぎり詳細ダイアログコンポーネント
  * おにぎりの表示・編集を行います
  */
-export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: OnigiriDialogProps) {
+export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave, onDelete }: OnigiriDialogProps) {
   // 編集モードかどうか
   const [isEditing, setIsEditing] = useState(!onigiri);
 
@@ -83,6 +84,10 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
   // バリデーション: タッチ済みフィールドの追跡
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
+  // 削除確認状態
+  const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Props変更時の処理
   useEffect(() => {
     setIsEditing(!onigiri);
@@ -99,6 +104,8 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
     });
 
     setTouched({});
+    setIsDeleteConfirming(false);
+    setIsDeleting(false);
 
     isFirstRender.current = false;
   }, [date, onigiri, isOpen]);
@@ -357,6 +364,18 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
       setTouched({});
     }
     setIsEditing(!isEditing);
+  };
+
+  // 削除ハンドラ
+  const handleDelete = async () => {
+    if (!onigiri || !onDelete) return;
+    setIsDeleting(true);
+    try {
+      await onDelete(onigiri);
+    } catch {
+      setIsDeleting(false);
+      setIsDeleteConfirming(false);
+    }
   };
 
   return (
@@ -746,13 +765,47 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave }: Onigir
           </>
         ) : (
           <>
-            <Button variant="outline" onClick={onClose} className="px-3 py-1 sm:px-4 sm:py-2">
-              閉じる
-            </Button>
-            {onigiri && (
-              <Button onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
-                編集
-              </Button>
+            {isDeleteConfirming ? (
+              <>
+                <p className="text-sm text-destructive mr-auto self-center">本当に削除しますか？</p>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteConfirming(false)}
+                  disabled={isDeleting}
+                  className="px-3 py-1 sm:px-4 sm:py-2"
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="px-3 py-1 sm:px-4 sm:py-2"
+                >
+                  {isDeleting ? "削除中..." : "削除する"}
+                </Button>
+              </>
+            ) : (
+              <>
+                {onigiri && onDelete && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDeleteConfirming(true)}
+                    className="px-3 py-1 sm:px-4 sm:py-2 text-destructive hover:text-destructive-foreground hover:bg-destructive mr-auto"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    削除
+                  </Button>
+                )}
+                <Button variant="outline" onClick={onClose} className="px-3 py-1 sm:px-4 sm:py-2">
+                  閉じる
+                </Button>
+                {onigiri && (
+                  <Button onClick={toggleEditMode} className="px-3 py-1 sm:px-4 sm:py-2">
+                    編集
+                  </Button>
+                )}
+              </>
             )}
           </>
         )}

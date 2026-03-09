@@ -131,6 +131,43 @@ export const OnigiriService = {
     }
   },
 
+  // おにぎりを画像ごと削除
+  async deleteWithImages(onigiri: Onigiri): Promise<void> {
+    if (!onigiri.id) throw new Error('IDは必須です');
+
+    // 画像の削除（ベストエフォート）
+    const imageUrls = [onigiri.imageUrl, onigiri.eatImageUrl].filter(Boolean) as string[];
+
+    for (const imageUrl of imageUrls) {
+      try {
+        if (imageUrl.includes('onigiri/')) {
+          const pathMatch = imageUrl.match(/\/onigiri\/[^/]+\.[^/?#]+/);
+          if (pathMatch) {
+            const imagePath = pathMatch[0].substring(1);
+            let bucketName = 'onigiriimage';
+            if (imageUrl.includes('/public/')) {
+              const bucketMatch = imageUrl.match(/\/public\/([^/]+)\//);
+              if (bucketMatch && bucketMatch[1]) {
+                bucketName = bucketMatch[1];
+              }
+            }
+            const { error: removeError } = await supabase.storage
+              .from(bucketName)
+              .remove([imagePath]);
+            if (removeError) {
+              console.warn('画像の削除に失敗しました:', removeError);
+            }
+          }
+        }
+      } catch (deleteError) {
+        console.warn('画像削除エラー:', deleteError);
+      }
+    }
+
+    // DBレコードの削除
+    await this.delete(onigiri.id);
+  },
+
   // 検索条件でおにぎりを検索
   async search(params: {
     name?: string;
