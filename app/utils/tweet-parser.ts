@@ -56,13 +56,29 @@ function extractName(text: string): string | null {
 }
 
 /**
+ * 店舗名の略称を正式名称に変換する
+ */
+const STORE_NAME_MAP: { pattern: RegExp; official: string }[] = [
+  { pattern: /^セブン$/, official: "セブンイレブン" },
+  { pattern: /^ファミマ$/, official: "ファミリーマート" },
+];
+
+function normalizeStoreName(name: string): string {
+  for (const { pattern, official } of STORE_NAME_MAP) {
+    if (pattern.test(name)) return official;
+  }
+  return name;
+}
+
+/**
  * ツイートテキストからおにぎり情報を解析する
  */
 export function parseTweetForOnigiri(text: string): ParsedTweetData {
   const lines = text.split("\n").filter((l) => l.trim());
 
-  // 1行目: 店舗名（絵文字除去）
-  const storeName = lines.length >= 1 ? removeEmojis(lines[0]) || null : null;
+  // 1行目: 店舗名（絵文字除去 → 略称を正式名称に変換）
+  const rawStoreName = lines.length >= 1 ? removeEmojis(lines[0]) || null : null;
+  const storeName = rawStoreName ? normalizeStoreName(rawStoreName) : null;
 
   // 2行目: 商品名 + 価格
   let name: string | null = null;
