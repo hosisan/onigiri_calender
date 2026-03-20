@@ -7,7 +7,8 @@ import { Button } from "../ui/button";
 import { DialogTitle, DialogDescription } from "../ui/dialog";
 import Image from "next/image";
 import { supabase } from "../../utils/supabase";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Link } from "lucide-react";
+import { extractTweetId } from "../../utils/tweet-parser";
 
 /**
  * 星評価コンポーネント
@@ -88,6 +89,12 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave, onDelete
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Xポストインポート状態
+  const [tweetUrl, setTweetUrl] = useState("");
+  const [isFetchingTweet, setIsFetchingTweet] = useState(false);
+  const [tweetFetchError, setTweetFetchError] = useState("");
+  const [tweetFetchSuccess, setTweetFetchSuccess] = useState(false);
+
   // Props変更時の処理
   useEffect(() => {
     setIsEditing(!onigiri);
@@ -106,6 +113,9 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave, onDelete
     setTouched({});
     setIsDeleteConfirming(false);
     setIsDeleting(false);
+    setTweetUrl("");
+    setTweetFetchError("");
+    setTweetFetchSuccess(false);
 
     isFirstRender.current = false;
   }, [date, onigiri, isOpen]);
@@ -304,6 +314,116 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave, onDelete
     }
   };
 
+  // 画像をダウンロードしてSupabaseにアップロードする
+  const downloadAndUploadImage = async (imageUrl: string): Promise<string> => {
+    const resp = await fetch(imageUrl);
+    const blob = await resp.blob();
+    const file = new File([blob], "tweet-image.jpg", { type: blob.type || "image/jpeg" });
+
+    let resizedImage: Blob | File = file;
+    try {
+      if (typeof window !== "undefined") {
+        const imageResizer = await import("browser-image-resizer");
+        if (imageResizer?.readAndCompressImage) {
+          resizedImage = await imageResizer.readAndCompressImage(file, {
+            quality: 0.85,
+            maxWidth: 500,
+            maxHeight: 500,
+            debug: false,
+          });
+        }
+      }
+    } catch (resizeError) {
+      console.warn("画像リサイズに失敗:", resizeError);
+    }
+
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`;
+    const filePath = `onigiri/${fileName}`;
+
+    const { error } = await supabase.storage
+      .from("onigiriimage")
+      .upload(filePath, resizedImage, {
+        cacheControl: "3600",
+        upsert: true,
+        contentType: "image/jpeg",
+      });
+
+    if (error) throw error;
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("onigiriimage").getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
+  // Xポストからデータを取得するハンドラ
+  const handleFetchTweet = async (urlOverride?: string) => {
+    const url = urlOverride || tweetUrl;
+    if (!url.trim()) return;
+
+    if (!extractTweetId(url)) {
+      setTweetFetchError("有効なXのポストURLを入力してください");
+      return;
+    }
+
+    setIsFetchingTweet(true);
+    setTweetFetchError("");
+    setTweetFetchSuccess(false);
+
+    try {
+      const response = await fetch("/api/fetch-tweet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setTweetFetchError(errorData.error || "ポストのデータを取得できませんでした");
+        return;
+      }
+
+      const data = await response.json();
+
+      // テキストデータでフォームを更新（空フィールドのみ）
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || data.parsed.name || "",
+        storeName: prev.storeName || data.parsed.storeName || "",
+        price: prev.price ?? data.parsed.price ?? 0,
+        memo: prev.memo || data.text || "",
+      }));
+
+      // 画像をSupabaseにダウンロード・アップロード（2枚並行）
+      if (data.images.length >= 2) {
+        try {
+          setIsImageUploading(true);
+          const [imagePublicUrl, eatImagePublicUrl] = await Promise.all([
+            downloadAndUploadImage(data.images[0]),
+            downloadAndUploadImage(data.images[1]),
+          ]);
+          setFormData((prev) => ({
+            ...prev,
+            imageUrl: imagePublicUrl,
+            eatImageUrl: eatImagePublicUrl,
+          }));
+        } catch (imgError) {
+          console.warn("画像のダウンロードに失敗:", imgError);
+        } finally {
+          setIsImageUploading(false);
+        }
+      }
+
+      setTweetFetchSuccess(true);
+      setTimeout(() => setTweetFetchSuccess(false), 3000);
+    } catch {
+      setTweetFetchError("通信エラーが発生しました。もう一度お試しください。");
+    } finally {
+      setIsFetchingTweet(false);
+    }
+  };
+
   // フォーム入力の変更ハンドラ
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -414,6 +534,52 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave, onDelete
         {isEditing ? (
           // 編集フォーム
           <form className="space-y-5 py-2">
+            {/* セクション: Xからインポート */}
+            <FormSection title="Xからインポート">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Link className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={tweetUrl}
+                    onChange={(e) => {
+                      setTweetUrl(e.target.value);
+                      setTweetFetchError("");
+                    }}
+                    onPaste={(e) => {
+                      const pasted = e.clipboardData.getData("text");
+                      if (extractTweetId(pasted)) {
+                        e.preventDefault();
+                        setTweetUrl(pasted);
+                        setTimeout(() => handleFetchTweet(pasted), 0);
+                      }
+                    }}
+                    placeholder="https://x.com/user/status/..."
+                    className="w-full p-2 pl-8 border border-input rounded-md bg-background text-foreground text-sm"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleFetchTweet()}
+                  disabled={isFetchingTweet || !tweetUrl.trim()}
+                  className="px-3 py-1 whitespace-nowrap"
+                >
+                  {isFetchingTweet ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-500" />
+                  ) : (
+                    "取得"
+                  )}
+                </Button>
+              </div>
+              {tweetFetchError && (
+                <p className="text-xs text-red-500">{tweetFetchError}</p>
+              )}
+              {tweetFetchSuccess && (
+                <p className="text-xs text-green-600">ポストからデータを取得しました</p>
+              )}
+            </FormSection>
+
             {/* セクション: 基本情報 */}
             <FormSection title="基本情報">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
