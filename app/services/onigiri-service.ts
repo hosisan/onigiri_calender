@@ -1,5 +1,6 @@
 import { supabase } from '@/app/utils/supabase';
 import { Onigiri } from '@/app/models/Onigiri';
+import { deleteImageByUrl } from './image-service';
 
 // おにぎりデータの取得サービス
 export const OnigiriService = {
@@ -129,6 +130,21 @@ export const OnigiriService = {
       console.error(`ID：${id} のおにぎり削除エラー:`, error);
       throw error;
     }
+  },
+
+  // おにぎりを画像ごと削除
+  async deleteWithImages(onigiri: Onigiri): Promise<void> {
+    if (!onigiri.id) throw new Error('IDは必須です');
+
+    // 画像の削除（ベストエフォート）
+    const imageUrls = [onigiri.imageUrl, onigiri.eatImageUrl].filter(Boolean) as string[];
+
+    for (const imageUrl of imageUrls) {
+      await deleteImageByUrl(imageUrl);
+    }
+
+    // DBレコードの削除
+    await this.delete(onigiri.id);
   },
 
   // 検索条件でおにぎりを検索

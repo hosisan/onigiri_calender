@@ -96,6 +96,14 @@ export function isCurrentMonth(date: Date, currentDate: Date): boolean {
 }
 
 /**
+ * 現在の年月かどうかをチェック
+ */
+export function isCurrentYearMonth(year: number, month: number): boolean {
+  const now = new Date();
+  return now.getFullYear() === year && now.getMonth() + 1 === month;
+}
+
+/**
  * ナビゲーション用の年月の範囲を取得（2020年から現在まで）
  */
 export function getYearMonthRange(): { year: number; month: number }[] {

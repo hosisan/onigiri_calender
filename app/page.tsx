@@ -9,6 +9,8 @@ import { formatDateToString } from "./utils/date-utils";
 import { v4 as uuidv4 } from "uuid";
 import { OnigiriService } from "./services/onigiri-service";
 import { Dialog, DialogContent } from "./components/ui/dialog";
+import { toast } from "sonner";
+import { cn } from "./lib/utils";
 
 export default function Home() {
   // 現在選択中の年月
@@ -25,6 +27,7 @@ export default function Home() {
   const [selectedOnigiri, setSelectedOnigiri] = useState<Onigiri | undefined>(undefined);
   const [searchResults, setSearchResults] = useState<Onigiri[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastSavedDate, setLastSavedDate] = useState<string | null>(null);
 
   // カレンダー部分のref
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -112,6 +115,7 @@ export default function Home() {
   const handleNavigateMonth = (year: number, month: number) => {
     setCurrentYear(year);
     setCurrentMonth(month);
+    setLastSavedDate(null);
   };
 
   // おにぎり保存処理
@@ -153,11 +157,45 @@ export default function Home() {
         handleSearch({});
       }
 
+      // セル保存アニメーション用
+      setLastSavedDate(dateString);
+
+      // 成功トースト表示
+      toast.success("おにぎりを記録しました 🍙");
+
       // ダイアログを閉じる
       setIsDialogOpen(false);
     } catch (error) {
       console.error("おにぎりの保存に失敗しました:", error);
-      alert("おにぎりの保存に失敗しました。もう一度お試しください。");
+      toast.error("おにぎりの保存に失敗しました。もう一度お試しください。");
+    }
+  };
+
+  // おにぎり削除処理
+  const handleDeleteOnigiri = async (onigiri: Onigiri) => {
+    try {
+      await OnigiriService.deleteWithImages(onigiri);
+
+      // ローカルの状態を更新
+      const dateString = onigiri.date;
+      setOnigiriData(prevData => {
+        const newData = { ...prevData };
+        const dateOnigiri = newData[dateString]?.filter(o => o.id !== onigiri.id) || [];
+        if (dateOnigiri.length === 0) {
+          delete newData[dateString];
+        } else {
+          newData[dateString] = dateOnigiri;
+        }
+        return newData;
+      });
+
+      setSelectedOnigiri(undefined);
+      toast.success("おにぎりを削除しました");
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("おにぎりの削除に失敗しました:", error);
+      toast.error("おにぎりの削除に失敗しました。もう一度お試しください。");
+      throw error;
     }
   };
 
@@ -198,29 +236,43 @@ export default function Home() {
   return (
     <div className="container mx-auto py-8 px-4">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-center mb-4 text-foreground">おにぎりカレンダー</h1>
+        <h1 className="text-3xl font-bold text-center mb-4 text-foreground">🍙 おにぎりカレンダー</h1>
 
         <div className="flex justify-center mb-4">
-          <div className="inline-flex rounded-md shadow-sm" role="group">
+          <div className="relative inline-flex rounded-lg bg-muted p-1" role="tablist">
+            {/* スライドインジケーター */}
+            <div
+              className={cn(
+                "absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-md bg-orange-500 shadow-sm transition-transform duration-300 ease-in-out",
+                viewMode === "calendar" ? "translate-x-0 left-1" : "translate-x-full left-1"
+              )}
+              aria-hidden="true"
+            />
             <button
               type="button"
+              role="tab"
+              aria-selected={viewMode === "calendar"}
               onClick={() => setViewMode("calendar")}
-              className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+              className={cn(
+                "relative z-10 px-6 py-2 text-sm font-medium rounded-md transition-colors duration-300",
                 viewMode === "calendar"
-                  ? "bg-orange-500 text-white"
-                  : "bg-card text-foreground hover:bg-muted dark:hover:bg-muted"
-              } border border-border`}
+                  ? "text-white"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               カレンダー
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={viewMode === "search"}
               onClick={() => setViewMode("search")}
-              className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+              className={cn(
+                "relative z-10 px-6 py-2 text-sm font-medium rounded-md transition-colors duration-300",
                 viewMode === "search"
-                  ? "bg-orange-500 text-white"
-                  : "bg-card text-foreground hover:bg-muted dark:hover:bg-muted"
-              } border border-border`}
+                  ? "text-white"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
               検索
             </button>
@@ -233,9 +285,9 @@ export default function Home() {
           <div className="w-full max-w-4xl mx-auto">
             {/* スケルトン: ヘッダー */}
             <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-md bg-muted animate-pulse" />
+              <div className="w-12 h-12 rounded-md bg-muted animate-pulse" />
               <div className="w-32 h-7 rounded-md bg-muted animate-pulse" />
-              <div className="w-10 h-10 rounded-md bg-muted animate-pulse" />
+              <div className="w-12 h-12 rounded-md bg-muted animate-pulse" />
             </div>
 
             {/* スケルトン: 曜日ヘッダー */}
@@ -252,7 +304,7 @@ export default function Home() {
               {Array.from({ length: 35 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-20 sm:h-32 p-1 sm:p-2 border border-border rounded-lg bg-card animate-pulse"
+                  className="h-24 sm:h-36 p-1 sm:p-2 border border-border rounded-lg bg-card animate-pulse"
                 >
                   <div className="w-5 h-4 rounded bg-muted" />
                 </div>
@@ -268,6 +320,8 @@ export default function Home() {
                 onigiriData={onigiriData}
                 onDateSelect={handleDateSelect}
                 onNavigateMonth={handleNavigateMonth}
+                lastSavedDate={lastSavedDate}
+                onSaveAnimationEnd={() => setLastSavedDate(null)}
               />
             </div>
 
@@ -282,9 +336,9 @@ export default function Home() {
         )}
       </main>
 
-      {/* Radix Dialog によるモーダル */}
+      {/* オーバーレイダイアログ */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) setIsDialogOpen(false); }}>
-        <DialogContent className="max-w-3xl p-0 gap-0 max-h-[100svh] overflow-hidden [&>button:last-child]:hidden">
+        <DialogContent>
           {selectedDate && (
             <OnigiriDialog
               isOpen={isDialogOpen}
@@ -294,6 +348,7 @@ export default function Home() {
               onSave={(date, formData) => {
                 handleSaveOnigiri(date, formData);
               }}
+              onDelete={handleDeleteOnigiri}
             />
           )}
         </DialogContent>

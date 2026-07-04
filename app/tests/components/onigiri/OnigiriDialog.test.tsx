@@ -61,8 +61,8 @@ describe('OnigiriDialog - 表示モード', () => {
       />
     );
 
-    expect(screen.getByText('鮭おにぎり')).toBeInTheDocument();
-    expect(screen.getByText('ファミリーマート')).toBeInTheDocument();
+    expect(screen.getAllByText('鮭おにぎり', { exact: false }).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('ファミリーマート').length).toBeGreaterThan(0);
     expect(screen.getByText('150円')).toBeInTheDocument();
   });
 
@@ -100,6 +100,37 @@ describe('OnigiriDialog - 表示モード', () => {
 
     expect(mockOnClose).toHaveBeenCalled();
   });
+
+  it('情報カードが表示されること', () => {
+    renderWithDialog(
+      <OnigiriDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        date={testDate}
+        onigiri={mockOnigiri}
+        onSave={mockOnSave}
+      />
+    );
+
+    // 情報カードのラベルが表示されること
+    expect(screen.getByText('店舗')).toBeInTheDocument();
+    expect(screen.getByText('価格')).toBeInTheDocument();
+    expect(screen.getByText('評価')).toBeInTheDocument();
+  });
+
+  it('メモが全文表示されること', () => {
+    renderWithDialog(
+      <OnigiriDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        date={testDate}
+        onigiri={mockOnigiri}
+        onSave={mockOnSave}
+      />
+    );
+
+    expect(screen.getByText('朝食に食べました。')).toBeInTheDocument();
+  });
 });
 
 describe('OnigiriDialog - 編集モード', () => {
@@ -122,6 +153,35 @@ describe('OnigiriDialog - 編集モード', () => {
     expect(screen.getByLabelText(/おにぎり名/)).toBeInTheDocument();
     expect(screen.getByLabelText(/店舗名/)).toBeInTheDocument();
     expect(screen.getByLabelText(/価格/)).toBeInTheDocument();
+  });
+
+  it('フォームセクションが表示されること', () => {
+    renderWithDialog(
+      <OnigiriDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        date={testDate}
+        onSave={mockOnSave}
+      />
+    );
+
+    expect(screen.getByText('基本情報')).toBeInTheDocument();
+    expect(screen.getByText('写真')).toBeInTheDocument();
+    expect(screen.getByText('メモ')).toBeInTheDocument();
+  });
+
+  it('画像アップロードカードのプレースホルダーが表示されること', () => {
+    renderWithDialog(
+      <OnigiriDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        date={testDate}
+        onSave={mockOnSave}
+      />
+    );
+
+    const placeholders = screen.getAllByText('写真を追加');
+    expect(placeholders.length).toBe(2);
   });
 
   it('必須フィールドが空の場合、保存ボタンが無効化されること', () => {
@@ -234,12 +294,32 @@ describe('OnigiriDialog - 編集モード', () => {
     fireEvent.click(screen.getByText('キャンセル'));
 
     // 元のおにぎり名が表示される（表示モードに戻る）
-    expect(screen.getByText('鮭おにぎり')).toBeInTheDocument();
+    expect(screen.getAllByText('鮭おにぎり', { exact: false }).length).toBeGreaterThan(0);
+  });
+
+  it('バリデーションエラーがblur後に表示されること', () => {
+    renderWithDialog(
+      <OnigiriDialog
+        isOpen={true}
+        onClose={mockOnClose}
+        date={testDate}
+        onSave={mockOnSave}
+      />
+    );
+
+    const nameInput = screen.getByLabelText(/おにぎり名/);
+
+    // フォーカスしてからblur
+    fireEvent.focus(nameInput);
+    fireEvent.blur(nameInput);
+
+    // バリデーションメッセージが表示される
+    expect(screen.getByText('おにぎり名は必須です')).toBeInTheDocument();
   });
 });
 
 describe('OnigiriDialog - アクセシビリティ', () => {
-  it('DialogTitleが正しいテキストでレンダリングされること', () => {
+  it('BottomSheetTitleが正しいテキストでレンダリングされること', () => {
     renderWithDialog(
       <OnigiriDialog
         isOpen={true}

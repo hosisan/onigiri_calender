@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, SearchX } from "lucide-react";
 import { Onigiri, OnigiriSearchParams } from "../../models/Onigiri";
 import { Button } from "../ui/button";
 import { formatDisplayDate } from "../../utils/date-utils";
@@ -211,8 +211,14 @@ export function OnigiriSearch({ onSearch, onSelectOnigiri, searchResults }: Onig
             })}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            検索条件に一致するおにぎりが見つかりませんでした。
+          <div className="text-center py-12 text-muted-foreground">
+            <SearchX className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+            <p className="text-sm font-medium mb-1">
+              おにぎりが見つかりませんでした
+            </p>
+            <p className="text-xs text-muted-foreground/70">
+              検索条件を変更して再度お試しください
+            </p>
           </div>
         )}
       </div>

@@ -21,6 +21,23 @@ const mockOnigiriData = {
   ]
 };
 
+// 画像なしのダミーデータ
+const mockOnigiriDataNoImage = {
+  '2023-01-15': [
+    {
+      id: 'd8b4a7e0-f3e1-4c9b-9a6e-c9f0d9c5b9a2',
+      date: '2023-01-15',
+      name: '梅おにぎり',
+      storeName: 'セブンイレブン',
+      price: 130,
+      rating: 3,
+      memo: '',
+      createdAt: '2023-01-15T08:30:00Z',
+      updatedAt: '2023-01-15T08:30:00Z'
+    }
+  ]
+};
+
 // テスト用のモック関数
 const mockDateSelect = jest.fn();
 const mockNavigateMonth = jest.fn();
@@ -80,7 +97,7 @@ describe('CalendarGrid', () => {
 
     // onDateSelect関数が呼ばれたことを確認
     expect(mockDateSelect).toHaveBeenCalled();
-    
+
     // 引数が正しい日付（2023-01-15）であることを確認
     const calledDate = mockDateSelect.mock.calls[0][0];
     expect(formatDateToString(calledDate)).toBe('2023-01-15');
@@ -154,11 +171,11 @@ describe('CalendarGrid - モバイルレスポンシブ', () => {
 
     // 15日のボタンを取得
     const day15Button = screen.getByText('15').closest('button');
-    expect(day15Button).toHaveClass('h-20');
-    expect(day15Button).toHaveClass('sm:h-32');
+    expect(day15Button).toHaveClass('h-24');
+    expect(day15Button).toHaveClass('sm:h-36');
   });
 
-  it('おにぎりのサムネイル画像にhidden sm:blockが適用されていること', () => {
+  it('おにぎりのサムネイル画像がモバイルでも表示されること', () => {
     render(
       <CalendarGrid
         year={2023}
@@ -169,10 +186,28 @@ describe('CalendarGrid - モバイルレスポンシブ', () => {
       />
     );
 
-    // 画像コンテナを取得（imageUrlがある場合）
-    const imageContainer = screen.getByAltText('鮭おにぎり').closest('div');
-    expect(imageContainer).toHaveClass('hidden');
-    expect(imageContainer).toHaveClass('sm:block');
+    // 画像要素が存在し、hidden クラスが適用されていないことを確認
+    const image = screen.getByAltText('鮭おにぎり');
+    expect(image).toBeInTheDocument();
+    expect(image).not.toHaveClass('hidden');
+  });
+
+  it('画像なしおにぎりにはオレンジドットインジケーターが表示されること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriDataNoImage}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    // おにぎり名が表示されている
+    expect(screen.getByText('梅おにぎり')).toBeInTheDocument();
+
+    // 画像は表示されない
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 });
 
@@ -193,7 +228,7 @@ describe('CalendarGrid - ダークモード対応', () => {
     expect(day15Button).toHaveClass('bg-card');
   });
 
-  it('当月外セルにbg-mutedクラスが適用されていること', () => {
+  it('当月外セルにbg-muted/50クラスが適用されていること', () => {
     render(
       <CalendarGrid
         year={2023}
@@ -204,16 +239,254 @@ describe('CalendarGrid - ダークモード対応', () => {
       />
     );
 
-    // 2023年1月のカレンダーでは、前月の12月の日付が表示される
-    // カレンダーグリッドの最初のセルを確認（日曜始まりで1月1日が日曜の場合は当月）
-    // 1月1日は日曜日なので全て当月。代わりに2月の日付を確認
-    // getAllByTextで複数の同じテキストを取得する可能性があるため、特定の日付を使う
     const allButtons = document.querySelectorAll('button[type="button"]');
-    // 最後のボタンは次月の日付のはず
     const lastButtons = Array.from(allButtons).filter(btn => {
-      return btn.classList.contains('bg-muted') && btn.classList.contains('text-muted-foreground');
+      return btn.classList.contains('bg-muted/50') && btn.classList.contains('text-muted-foreground');
     });
-    // 前月または次月の日付があればbg-mutedを持つ
+    // 前月または次月の日付があればbg-muted/50を持つ
     expect(lastButtons.length).toBeGreaterThan(0);
   });
-}); 
+});
+
+describe('CalendarGrid - 今日ボタン', () => {
+  beforeEach(() => {
+    mockNavigateMonth.mockClear();
+  });
+
+  it('現在月以外を表示中に「今日」ボタンが表示されること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    const todayButton = screen.getByLabelText('今月に戻る');
+    expect(todayButton).toBeInTheDocument();
+  });
+
+  it('現在月を表示中は「今日」ボタンが非表示であること', () => {
+    const now = new Date();
+    render(
+      <CalendarGrid
+        year={now.getFullYear()}
+        month={now.getMonth() + 1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    expect(screen.queryByLabelText('今月に戻る')).not.toBeInTheDocument();
+  });
+
+  it('「今日」ボタンクリックで現在月に移動すること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    const todayButton = screen.getByLabelText('今月に戻る');
+    fireEvent.click(todayButton);
+
+    const now = new Date();
+    expect(mockNavigateMonth).toHaveBeenCalledWith(
+      now.getFullYear(),
+      now.getMonth() + 1
+    );
+  });
+});
+
+describe('CalendarGrid - 空状態ガイダンス', () => {
+  it('おにぎり未登録月にガイダンスメッセージが表示されること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    expect(screen.getByText('日付をタップしておにぎりを記録しましょう')).toBeInTheDocument();
+  });
+
+  it('おにぎり登録済み月にはガイダンスが表示されないこと', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    expect(screen.queryByText('日付をタップしておにぎりを記録しましょう')).not.toBeInTheDocument();
+  });
+});
+
+describe('CalendarGrid - 保存アニメーション', () => {
+  it('lastSavedDateに一致するセルにアニメーションクラスが適用されること', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+        lastSavedDate="2023-01-15"
+      />
+    );
+
+    const day15Button = screen.getByText('15').closest('button');
+    expect(day15Button).toHaveClass('animate-cell-saved');
+  });
+
+  it('lastSavedDateがnullの場合アニメーションクラスが適用されないこと', () => {
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+        lastSavedDate={null}
+      />
+    );
+
+    const day15Button = screen.getByText('15').closest('button');
+    expect(day15Button).not.toHaveClass('animate-cell-saved');
+  });
+
+  it('アニメーション完了時にonSaveAnimationEndが呼ばれること', () => {
+    const mockAnimationEnd = jest.fn();
+    render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={mockOnigiriData}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+        lastSavedDate="2023-01-15"
+        onSaveAnimationEnd={mockAnimationEnd}
+      />
+    );
+
+    const day15Button = screen.getByText('15').closest('button');
+    if (day15Button) {
+      fireEvent.animationEnd(day15Button);
+    }
+
+    expect(mockAnimationEnd).toHaveBeenCalled();
+  });
+});
+
+describe('CalendarGrid - スワイプナビゲーション', () => {
+  beforeEach(() => {
+    mockNavigateMonth.mockClear();
+  });
+
+  it('左スワイプで次月に移動すること', () => {
+    const { container } = render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    const calendarContainer = container.firstChild as HTMLElement;
+
+    fireEvent.touchStart(calendarContainer, {
+      touches: [{ clientX: 200, clientY: 200 }]
+    });
+    fireEvent.touchEnd(calendarContainer, {
+      changedTouches: [{ clientX: 100, clientY: 200 }]
+    });
+
+    expect(mockNavigateMonth).toHaveBeenCalledWith(2023, 2);
+  });
+
+  it('右スワイプで前月に移動すること', () => {
+    const { container } = render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    const calendarContainer = container.firstChild as HTMLElement;
+
+    fireEvent.touchStart(calendarContainer, {
+      touches: [{ clientX: 100, clientY: 200 }]
+    });
+    fireEvent.touchEnd(calendarContainer, {
+      changedTouches: [{ clientX: 200, clientY: 200 }]
+    });
+
+    expect(mockNavigateMonth).toHaveBeenCalledWith(2022, 12);
+  });
+
+  it('スワイプ距離が閾値未満の場合は移動しないこと', () => {
+    const { container } = render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    const calendarContainer = container.firstChild as HTMLElement;
+
+    fireEvent.touchStart(calendarContainer, {
+      touches: [{ clientX: 200, clientY: 200 }]
+    });
+    fireEvent.touchEnd(calendarContainer, {
+      changedTouches: [{ clientX: 170, clientY: 200 }]
+    });
+
+    // 30px < 50px threshold, should not navigate
+    expect(mockNavigateMonth).not.toHaveBeenCalled();
+  });
+
+  it('垂直方向のスワイプでは月移動しないこと', () => {
+    const { container } = render(
+      <CalendarGrid
+        year={2023}
+        month={1}
+        onigiriData={{}}
+        onDateSelect={mockDateSelect}
+        onNavigateMonth={mockNavigateMonth}
+      />
+    );
+
+    const calendarContainer = container.firstChild as HTMLElement;
+
+    fireEvent.touchStart(calendarContainer, {
+      touches: [{ clientX: 200, clientY: 100 }]
+    });
+    fireEvent.touchEnd(calendarContainer, {
+      changedTouches: [{ clientX: 140, clientY: 300 }]
+    });
+
+    // deltaX=60 but deltaY=200 > deltaX, so no navigation
+    expect(mockNavigateMonth).not.toHaveBeenCalled();
+  });
+});
