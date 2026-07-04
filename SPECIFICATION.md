@@ -8,10 +8,10 @@
 
 | カテゴリ | 技術 | バージョン |
 |---------|------|-----------|
-| フレームワーク | Next.js (App Router) | 15.5.12 |
+| フレームワーク | Next.js (App Router) | 15.5.20 |
 | UIライブラリ | React | 19.1.2 |
 | 言語 | TypeScript | 5 |
-| データベース | Supabase (PostgreSQL) | supabase-js 2.49.4 |
+| データベース | Supabase (PostgreSQL) | supabase-js 2.110.0 |
 | スタイリング | Tailwind CSS | 4 |
 | UIコンポーネント | shadcn/ui + Radix UI | - |
 | アイコン | Lucide React | 0.488.0 |
@@ -208,6 +208,8 @@ interface Onigiri {
 | PUT | おにぎり更新 | ボディ: id（必須）, 更新フィールド |
 | DELETE | おにぎり削除 | ボディ: id（必須） |
 
+> **注記**: このAPIはフロントエンドUIからは呼び出されない独立したREST APIである。UIはこのAPIを経由せず、`OnigiriService`（6.3節）を直接呼び出してデータベースにアクセスする。外部連携用に提供されているエンドポイントであり、UIの動作に影響しないため、削除する場合は外部利用の有無を確認すること。
+
 ### 6.2 Xポスト取得API (`/api/fetch-tweet`)
 
 | メソッド | 説明 | パラメータ |
@@ -355,3 +357,57 @@ React の `useState` フックによるローカルステート管理を採用�
 | `npm run test:coverage` | テスト（カバレッジ付き） |
 | `npm run test-supabase` | Supabase接続テスト |
 | `npm run check-env` | 環境変数確認 |
+
+## 11. ディレクトリ構成
+
+```
+app/
+├── page.tsx                                  # アプリのエントリーポイント。ヘッダー・カレンダー/検索の切替、ダイアログ表示、全体のステート管理を行う
+├── layout.tsx                                # ルートレイアウト。フォント・メタデータ・グローバルCSS・Toasterの設定
+├── lib/
+│   └── utils.ts                               # `cn()` などshadcn/ui系の共通ユーティリティ
+├── components/
+│   ├── calendar/
+│   │   └── calendar-grid.tsx                  # 月間カレンダーグリッド表示、月ナビゲーション、スワイプ操作、日付セルのおにぎり表示
+│   ├── onigiri/
+│   │   ├── onigiri-dialog.tsx                 # 詳細/編集ダイアログのコーディネーター。表示モード切替・保存/削除処理を統括
+│   │   ├── onigiri-detail-view.tsx            # 表示モード（登録済みおにぎりの詳細表示）のUI
+│   │   ├── onigiri-form.tsx                   # 編集モード（登録・編集フォーム）のUI組み立て
+│   │   ├── image-upload-field.tsx             # 画像アップロード/URL直接入力フィールド（写真・食べた時写真で共用）
+│   │   ├── tweet-import-section.tsx           # 「Xからインポート」セクション。ポストURL入力と自動取得のUI
+│   │   ├── star-rating.tsx                    # 星評価入力コンポーネント
+│   │   ├── form-section.tsx                   # フォーム内のセクション見出し・区切り線の共通レイアウト
+│   │   └── onigiri-search.tsx                 # 検索画面（検索条件フォーム＋結果リスト）
+│   └── ui/
+│       ├── bottom-sheet.tsx                   # モバイル向けボトムシートUI
+│       ├── button.tsx                         # 汎用ボタン（shadcn/ui）
+│       ├── dialog.tsx                         # Radix UIベースのダイアログ（フルスクリーン/中央モーダル切替対応）
+│       ├── input.tsx                          # 汎用テキスト入力
+│       ├── sonner.tsx                         # トースト通知（sonner）のラッパー
+│       └── textarea.tsx                       # 汎用テキストエリア
+├── services/
+│   ├── onigiri-service.ts                     # `OnigiriService`。おにぎりのDB CRUD・検索ロジック（Supabase PostgreSQL）
+│   └── image-service.ts                       # Supabase Storageへの画像アップロード（リサイズ含む）・URLからの削除・URLパース処理
+├── models/
+│   └── Onigiri.ts                             # `Onigiri` 型および派生型（CreateOnigiriInput 等）の定義
+├── utils/
+│   ├── date-utils.ts                          # 日付フォーマット・カレンダー計算などの日付ユーティリティ
+│   ├── supabase.ts                            # Supabaseクライアントの初期化
+│   └── tweet-parser.ts                        # Xポストのテキスト解析（店舗名・商品名・価格の抽出、略称変換）
+├── api/
+│   ├── onigiri/route.ts                       # おにぎりCRUDの独立REST API（UIからは未使用。6.1節参照）
+│   └── fetch-tweet/route.ts                   # XポストURLからテキスト・画像を取得するAPI
+└── tests/
+    ├── setupTests.ts                          # Jestのグローバルセットアップ
+    ├── components/
+    │   ├── calendar/CalendarGrid.test.tsx      # カレンダーグリッドのテスト
+    │   └── onigiri/
+    │       ├── OnigiriDialog.test.tsx          # 詳細/編集ダイアログのテスト
+    │       └── OnigiriSearch.test.tsx          # 検索画面のテスト
+    └── utils/
+        ├── date-utils.test.ts                  # 日付ユーティリティのテスト
+        └── test-utils.tsx                      # テスト用の共通ヘルパー（レンダリング補助等）
+
+scripts/
+└── import-csv.ts                              # CSVファイルからおにぎりデータを一括インポートするスクリプト
+```
