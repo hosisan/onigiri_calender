@@ -6,9 +6,9 @@ import { formatDisplayDate, formatDateToString } from "../../utils/date-utils";
 import { Button } from "../ui/button";
 import { DialogTitle, DialogDescription } from "../ui/dialog";
 import Image from "next/image";
-import { supabase } from "../../utils/supabase";
 import { Plus, Trash2, Link } from "lucide-react";
 import { extractTweetId } from "../../utils/tweet-parser";
+import { deleteImageByUrl, uploadImage, downloadAndUploadImage } from "../../services/image-service";
 
 /**
  * 星評価コンポーネント
@@ -147,157 +147,13 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave, onDelete
     setImageUploadError("");
 
     try {
-      // Supabase接続の確認
-      if (!supabase) {
-        throw new Error("Supabase接続が初期化されていません");
-      }
-
-      // 既存の画像URLを取得
+      // 既存の画像URLを取得し、あれば削除処理（ベストエフォート）
       const existingImageUrl = formData[fieldName];
-
-      // 既存画像があれば削除処理
-      if (existingImageUrl && existingImageUrl.includes('onigiri/')) {
-        try {
-          const pathMatch = existingImageUrl.match(/\/onigiri\/[^/]+\.[^/?#]+/);
-          if (pathMatch) {
-            const imagePath = pathMatch[0].substring(1);
-            console.log('削除する画像パス:', imagePath);
-
-            let bucketName = 'onigiriimage';
-            if (existingImageUrl.includes('/public/')) {
-              const bucketMatch = existingImageUrl.match(/\/public\/([^/]+)\//);
-              if (bucketMatch && bucketMatch[1]) {
-                bucketName = bucketMatch[1];
-              }
-            }
-
-            const { error: removeError } = await supabase.storage
-              .from(bucketName)
-              .remove([imagePath]);
-
-            if (removeError) {
-              console.warn('既存画像の削除に失敗しました:', removeError);
-            } else {
-              console.log('既存画像を削除しました:', imagePath);
-            }
-          }
-        } catch (deleteError) {
-          console.warn('画像削除エラー:', deleteError);
-        }
+      if (existingImageUrl) {
+        await deleteImageByUrl(existingImageUrl);
       }
 
-      // 画像サイズ取得とアスペクト比計算
-      const getImageAspectRatio = () => {
-        return new Promise<number>((resolve) => {
-          const img = new window.Image();
-          img.onload = () => {
-            const aspectRatio = img.height / img.width;
-            resolve(aspectRatio);
-          };
-          img.onerror = () => resolve(1.0);
-          img.src = URL.createObjectURL(file);
-        });
-      };
-
-      const aspectRatio = await getImageAspectRatio();
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `onigiri/${fileName}`;
-
-      let resizedImage: Blob | File = file;
-
-      try {
-        if (typeof window !== 'undefined') {
-          const imageResizer = await import('browser-image-resizer');
-          if (imageResizer && imageResizer.readAndCompressImage) {
-            const targetWidth = 500;
-            const targetHeight = Math.round(targetWidth * aspectRatio);
-
-            const imageConfig = {
-              quality: 0.85,
-              maxWidth: targetWidth,
-              maxHeight: targetHeight,
-              autoRotate: true,
-              debug: false,
-            };
-
-            resizedImage = await imageResizer.readAndCompressImage(file, imageConfig);
-            console.log('画像をリサイズしました:', resizedImage.size, 'bytes');
-          }
-        }
-      } catch (resizeError) {
-        console.warn('画像リサイズに失敗しました。オリジナル画像を使用します:', resizeError);
-      }
-
-      let bucketName = 'onigiriimage';
-      try {
-        const bucketNames = ['onigiriimage'];
-        let validBucketName = null;
-
-        for (const name of bucketNames) {
-          try {
-            const { data, error } = await supabase.storage.from(name).list('', { limit: 1 });
-
-            if (!error) {
-              console.log(`バケット '${name}' が存在します:`, data);
-              validBucketName = name;
-              break;
-            } else {
-              console.warn(`バケット '${name}' は利用できません:`, error);
-              if (error.message.includes('not found') || error.message.includes('doesn\'t exist')) {
-                console.error(`バケット '${name}' が見つかりません。管理者に連絡してバケットの作成を依頼してください。`);
-              }
-            }
-          } catch (e) {
-            console.warn(`バケット '${name}' チェック時にエラー:`, e);
-          }
-        }
-
-        if (validBucketName) {
-          console.log('有効なバケット名を見つけました:', validBucketName);
-          bucketName = validBucketName;
-        } else {
-          console.error('有効なバケットが見つかりませんでした。');
-        }
-      } catch (bucketCheckError) {
-        console.warn('バケット確認エラー:', bucketCheckError);
-      }
-
-      console.log(`Supabaseの '${bucketName}' バケットにアップロード開始:`, filePath);
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .upload(filePath, resizedImage, {
-          cacheControl: '3600',
-          upsert: true,
-          contentType: file.type
-        });
-
-      if (error) {
-        console.error('Supabaseアップロードエラー:', error);
-
-        if (error.message.includes('Permission')) {
-          setImageUploadError("アップロード権限がありません。管理者に連絡してください。");
-        } else if (error.message.includes('not found')) {
-          setImageUploadError("バケットが見つかりません。設定を確認してください。");
-        } else if (error.message.includes('row-level security policy') || error.message.includes('Unauthorized')) {
-          setImageUploadError("セキュリティポリシー違反: Supabaseダッシュボードで'onigiriimage'バケットのRLSポリシーを確認してください。匿名ユーザーに書き込み権限を付与する必要があります。");
-          console.error('RLSポリシーエラーの詳細:', error);
-          console.info('解決方法: Supabaseダッシュボードで、匿名ユーザー(anon)に対してINSERT権限を付与するRLSポリシーを設定してください。');
-        } else {
-          setImageUploadError(`アップロードエラー: ${error.message}`);
-        }
-
-        throw error;
-      }
-
-      console.log('アップロード成功:', data);
-
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(filePath);
-
-      console.log('公開URL:', publicUrl);
+      const publicUrl = await uploadImage(file);
 
       setFormData(prev => ({
         ...prev,
@@ -307,54 +163,13 @@ export function OnigiriDialog({ isOpen, onClose, date, onigiri, onSave, onDelete
       setIsImageUploading(false);
     } catch (error) {
       console.error('画像アップロードエラー:', error);
-      if (!imageUploadError) {
+      if (error instanceof Error && error.message) {
+        setImageUploadError(error.message);
+      } else if (!imageUploadError) {
         setImageUploadError("画像のアップロードに失敗しました");
       }
       setIsImageUploading(false);
     }
-  };
-
-  // 画像をダウンロードしてSupabaseにアップロードする
-  const downloadAndUploadImage = async (imageUrl: string): Promise<string> => {
-    const resp = await fetch(imageUrl);
-    const blob = await resp.blob();
-    const file = new File([blob], "tweet-image.jpg", { type: blob.type || "image/jpeg" });
-
-    let resizedImage: Blob | File = file;
-    try {
-      if (typeof window !== "undefined") {
-        const imageResizer = await import("browser-image-resizer");
-        if (imageResizer?.readAndCompressImage) {
-          resizedImage = await imageResizer.readAndCompressImage(file, {
-            quality: 0.85,
-            maxWidth: 500,
-            maxHeight: 500,
-            debug: false,
-          });
-        }
-      }
-    } catch (resizeError) {
-      console.warn("画像リサイズに失敗:", resizeError);
-    }
-
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`;
-    const filePath = `onigiri/${fileName}`;
-
-    const { error } = await supabase.storage
-      .from("onigiriimage")
-      .upload(filePath, resizedImage, {
-        cacheControl: "3600",
-        upsert: true,
-        contentType: "image/jpeg",
-      });
-
-    if (error) throw error;
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("onigiriimage").getPublicUrl(filePath);
-
-    return publicUrl;
   };
 
   // Xポストからデータを取得するハンドラ
