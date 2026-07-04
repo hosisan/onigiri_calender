@@ -10,8 +10,6 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test-supabase": "tsx app/tests/supabase-connection-test.ts",
-    "test-supabase:mock": "set MOCK=true&& tsx app/tests/supabase-connection-test.ts",
     "test-internet": "tsx app/tests/internet-connection-test.ts",
     "check-env": "tsx app/tests/check-env.ts",
     "import-csv": "tsx scripts/import-csv.ts"
